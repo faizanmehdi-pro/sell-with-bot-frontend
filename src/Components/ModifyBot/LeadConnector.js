@@ -188,6 +188,7 @@ const AddButton = styled(Link)`
 `;
 
 const LeadConnector = () => {
+  const token = localStorage.getItem("authToken");
   const [selectedItems, setSelectedItems] = useState([
     { id: 1, title: "AI Automation HQ", subtitle: "RRYOIUu546orj9aXOzw" },
   ]);
@@ -279,7 +280,7 @@ const LeadConnector = () => {
         )}
       </SearchBar>
         or
-        <AddButton to="http://54.197.41.35/oauth/initiate/">Add New</AddButton>
+        <AddButton to={`http://54.197.41.35/oauth/initiate/${token}`}>Add New</AddButton>
         </SearchBarContainer>
 
       {/* Render selected items */}

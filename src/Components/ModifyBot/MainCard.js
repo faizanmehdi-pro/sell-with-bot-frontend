@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { FaToggleOff, FaToggleOn } from "react-icons/fa";
+import { useMutation } from '@tanstack/react-query';
+import { updateBot } from "../../apis/updateBot";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   width: 100%;
@@ -72,25 +75,41 @@ const InputField = styled.input`
 `;
 
 const SaveButton = styled.button`
-  background-color: #2563eb;
+  background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
   color: white;
   padding: 10px;
   border: none;
   border-radius: 5px;
   font-size: 14px;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   width: 100%;
   margin-top: 10px;
 
+
   &:hover {
-    background-color: #1e40af;
+    background: ${(props) => (props.disabled ? "#ccc" : "#0056b3")};
   }
 `;
 
-const MainCard = () => {
+const Loader = styled.div`
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const MainCard = () => { 
   const [improvedLayout, setImprovedLayout] = useState(false);
   const [temperature, setTemperature] = useState(0.7);
-  const [maxTokens, setMaxTokens] = useState(500);
+  const [maxTokens, setMaxTokens] = useState(2000);
 
   const [whyText, setWhyText] = useState("");
 
@@ -116,16 +135,29 @@ const MainCard = () => {
   //   "#Overview\nHey you, you're a fun receptionist named @rep_name who works for a company that cleans houses.\nThis company is super local and well trusted in the community, so @lead_name doesn't have to worry about a thing.\n@lead_name responded to one of your online advertisements saying they want to get their house deep cleaned for $75!\n\n#About your Business\nThe company name is Clean Freaks and you take pride on your pricing.\nEven with the low price you use high quality products and are SPEEDY!\n\n#Crafting a Response\nIf @lead_name asks you a personal question, come up with a sincere response.\nDo not tell @lead_name you are a bot.\nOne cool thing your cleaning company does that others don't is wood treatment on all wood furniture 😎\nYou should not sound like an assistant, especially not some boring minimum wage earning assistant.\nThat means not using @lead_name's name in your responses.\nThis conversation should be a great time and engaging."
   // ); 
 
+  const mutation = useMutation({
+    mutationFn: updateBot,
+    onSuccess: (data) => {
+      toast.success('Bot updated successfully!');
+      console.log(data);
+    },
+    onError: (error) => {
+      toast.error('Failed to Update Bot!', error);
+    },
+  });
+
   const handleSave = () => {
-    console.log("Settings Saved:", {
-      temperature,
-      maxTokens,
+    mutation.mutate({
       whyText,
       businessInfo,
       responseText,
-      generalPrompt,
+      temperature,
+      maxTokens,
+      improvedLayout,
+      generalPrompt
     });
   };
+  
 
   return (
     <Container>
@@ -215,7 +247,7 @@ const MainCard = () => {
         onChange={(e) => setMaxTokens(parseInt(e.target.value, 10))}
       />
 
-      <SaveButton onClick={handleSave}>Save</SaveButton>
+      <SaveButton onClick={handleSave} disabled={mutation.isPending}>{mutation.isPending ? <Loader /> : "Sign In"}</SaveButton>
     </Container>
   );
 };

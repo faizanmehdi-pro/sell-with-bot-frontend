@@ -172,6 +172,7 @@ const Login = () => {
       login(data.token);
       navigate("/dashboard");
       toast.success("User Login Successfully!");
+      localStorage.setItem("user-ID", data.user_id)
     },
     onError: (error) => {
       toast.error(error.message);

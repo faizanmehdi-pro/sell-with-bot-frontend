@@ -247,7 +247,7 @@ const MainCard = () => {
         onChange={(e) => setMaxTokens(parseInt(e.target.value, 10))}
       />
 
-      <SaveButton onClick={handleSave} disabled={mutation.isPending}>{mutation.isPending ? <Loader /> : "Sign In"}</SaveButton>
+      <SaveButton onClick={handleSave} disabled={mutation.isPending}>{mutation.isPending ? <Loader /> : "Save"}</SaveButton>
     </Container>
   );
 };

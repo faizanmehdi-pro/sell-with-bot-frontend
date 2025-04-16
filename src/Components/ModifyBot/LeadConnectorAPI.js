@@ -262,12 +262,12 @@ const LeadConnector = () => {
       if (data?.auth_url) {
         window.location.href = data.auth_url;
       } else {
-        toast.error("Auth URL not found");
+        toast.error("Redirect URL not found");
         console.log("data", data)
       }
     },
     onError: (error) => {
-      toast.error("Auth URL not found:", error);
+      toast.error("Redirect URL not found:", error);
     },
   });
 

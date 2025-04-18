@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { FaToggleOff, FaToggleOn } from "react-icons/fa";
-import { useMutation } from '@tanstack/react-query';
-import { updateBot } from "../../apis/updateBot";
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { updateBot } from "../../apis/WebHook/updateBot";
+import { getBotDetails } from "../../apis/WebHook/getBotDetailPrompt";
 import { toast } from "react-toastify";
 
+// Styled Components...
 const Container = styled.div`
   width: 100%;
   background: #ffffff;
@@ -72,6 +74,7 @@ const InputField = styled.input`
   border-radius: 5px;
   font-size: 14px;
   outline: none;
+  color: #4b5563;
 `;
 
 const SaveButton = styled.button`
@@ -84,7 +87,6 @@ const SaveButton = styled.button`
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   width: 100%;
   margin-top: 10px;
-
 
   &:hover {
     background: ${(props) => (props.disabled ? "#ccc" : "#0056b3")};
@@ -106,48 +108,43 @@ const Loader = styled.div`
   }
 `;
 
-const MainCard = () => { 
+const MainCard = () => {
   const [improvedLayout, setImprovedLayout] = useState(false);
-  const [temperature, setTemperature] = useState(0.7);
-  const [maxTokens, setMaxTokens] = useState(2000);
-
+  const [botName, setBotName] = useState("");
   const [whyText, setWhyText] = useState("");
-
   const [businessInfo, setBusinessInfo] = useState("");
-
   const [responseText, setResponseText] = useState("");
-
   const [generalPrompt, setGeneralPrompt] = useState("");
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(500);
 
-  // const [whyText, setWhyText] = useState(
-  //   "You are AI, a friendly, wise and empathetic AI assistant with a background in digital marketing, freelancing and GoHighLevel CRM who works at Automations Guru Company.\nYour main objective is to effectively qualify leads.\nOnce a lead is qualified, you should offer them the opportunity to purchase gohighlevel masterclass course."
-  // );
+  const { data, isLoading } = useQuery({
+    queryKey: ["botDetails", improvedLayout],
+    queryFn: () => getBotDetails(improvedLayout),
+  });
 
-  // const [businessInfo, setBusinessInfo] = useState(
-  //   'Offer Help:\n"It sounds like you’re serious about making freelancing work!\nWould you be interested in some resources to help you get started?"\n\nIntroduce Resources:\nFree "I have a free ebook that could help:\nhttps://www.haidersafdar.com/ebook\nand a freelancing training you might find useful:\nhttps://www.haidersafdar.com/free-training"\n\nPaid, if they ask for more:\nWe also have a GoHighLevel Masterclass that dives deeper into freelancing success:\nhttps://gohighlevelmasterclass.com/urdu'
-  // );
-
-  // const [responseText, setResponseText] = useState(
-  //   "Always address customers by their name, contact.first_name.\nIf you do not know the answer to a question, do not invent one.\nIf Prospect asks about our paid course tell them about our GHL Masterclass.\nIf they ask about a free course or resource send them ebook:\nhttps://www.haidersafdar.com/ebook\nas free resource and freelancing training as free course/masterclass:\nhttps://www.haidersafdar.com/free-training\nFor paid, give them GoHighLevel masterclass:\nhttps://gohighlevelmasterclass.com/urdu"
-  // );
-
-  // const [generalPrompt, setGeneralPrompt] = useState(
-  //   "#Overview\nHey you, you're a fun receptionist named @rep_name who works for a company that cleans houses.\nThis company is super local and well trusted in the community, so @lead_name doesn't have to worry about a thing.\n@lead_name responded to one of your online advertisements saying they want to get their house deep cleaned for $75!\n\n#About your Business\nThe company name is Clean Freaks and you take pride on your pricing.\nEven with the low price you use high quality products and are SPEEDY!\n\n#Crafting a Response\nIf @lead_name asks you a personal question, come up with a sincere response.\nDo not tell @lead_name you are a bot.\nOne cool thing your cleaning company does that others don't is wood treatment on all wood furniture 😎\nYou should not sound like an assistant, especially not some boring minimum wage earning assistant.\nThat means not using @lead_name's name in your responses.\nThis conversation should be a great time and engaging."
-  // ); 
+  useEffect(() => {
+    if (!data) return;
+    const bot = data.bot || {};
+    console.log("botData", data, bot);
+    setBotName(bot.name || "");
+    setWhyText(bot.prompt || "");
+    setBusinessInfo(bot.business_rules || "");
+    setResponseText(bot.response_text || "");
+    setGeneralPrompt(bot.prompt || "");
+    setTemperature(bot.temperature ?? 0.7);
+    setMaxTokens(bot.max_token ?? 500);
+  }, [data]);
 
   const mutation = useMutation({
     mutationFn: updateBot,
-    onSuccess: (data) => {
-      toast.success('Bot updated successfully!');
-      console.log(data);
-    },
-    onError: (error) => {
-      toast.error('Failed to Update Bot!', error);
-    },
+    onSuccess: () => toast.success('Bot updated successfully!'),
+    onError: () => toast.error('Failed to Update Bot!'),
   });
 
   const handleSave = () => {
     mutation.mutate({
+      botName,
       whyText,
       businessInfo,
       responseText,
@@ -157,43 +154,44 @@ const MainCard = () => {
       generalPrompt
     });
   };
-  
+
+  if (isLoading) return <Container>Loading Bot Info...</Container>;
 
   return (
     <Container>
       <ToggleContainer>
         <ToggleLabel>Use Improved Layout</ToggleLabel>
         {improvedLayout ? (
-          <FaToggleOn 
-            size={24} 
-            color="#2563eb" 
-            onClick={() => {
-              setImprovedLayout(false);
-              setMaxTokens(2000);
-            }}
+          <FaToggleOn
+            size={24}
+            color="#2563eb"
+            onClick={() => setImprovedLayout(false)}
           />
         ) : (
-          <FaToggleOff 
-            size={24} 
-            color="#6b7280" 
-            onClick={() => {
-              setImprovedLayout(true);
-              setMaxTokens(500);
-            }}
-          />
+          <FaToggleOff
+            size={24}
+            color="#6b7280"
+            onClick={() => setImprovedLayout(true)} />
         )}
       </ToggleContainer>
 
       {improvedLayout ? (
+        
         <>
           <Section>
+            <Title>Bot Name</Title>
+            <InputField
+              value={botName}
+              onChange={(e) => setBotName(e.target.value)}
+              placeholder="Enter Bot Name"
+            />
             <Title>Why We’re Having This Talk</Title>
             <TextArea
               value={whyText}
               onChange={(e) => setWhyText(e.target.value)}
               placeholder="Please Enter Why We’re Having This Talk"
             />
-            <CharacterCount>{whyText.length} / 500 CHARACTERS</CharacterCount>
+            <CharacterCount>{whyText.length} / {maxTokens} CHARACTERS</CharacterCount>
           </Section>
 
           <Section>
@@ -203,7 +201,7 @@ const MainCard = () => {
               onChange={(e) => setBusinessInfo(e.target.value)}
               placeholder="Please Enter Important Business Information"
             />
-            <CharacterCount>{businessInfo.length} / 500 CHARACTERS</CharacterCount>
+            <CharacterCount>{businessInfo.length} / {maxTokens} CHARACTERS</CharacterCount>
           </Section>
 
           <Section>
@@ -213,22 +211,28 @@ const MainCard = () => {
               onChange={(e) => setResponseText(e.target.value)}
               placeholder="Please Enter How to Respond"
             />
-            <CharacterCount>{responseText.length} / 500 CHARACTERS</CharacterCount>
+            <CharacterCount>{responseText.length} / {maxTokens} CHARACTERS</CharacterCount>
           </Section>
         </>
       ) : (
         <Section>
+        <Title>Bot Name</Title>
+        <InputField
+          value={botName}
+          onChange={(e) => setBotName(e.target.value)}
+          placeholder="Enter Bot Name"
+        />
           <Title>General Prompt</Title>
           <TextArea
             value={generalPrompt}
             onChange={(e) => setGeneralPrompt(e.target.value)}
             placeholder="Please Enter General Prompt"
           />
-          <CharacterCount>{generalPrompt.length} / 2000 CHARACTERS</CharacterCount>
+          <CharacterCount>{generalPrompt.length} / {maxTokens} CHARACTERS</CharacterCount>
         </Section>
       )}
 
-      <label>Temperature</label>
+      <Title>Temperature</Title>
       <InputField
         type="number"
         step="0.1"
@@ -238,16 +242,18 @@ const MainCard = () => {
         onChange={(e) => setTemperature(parseFloat(e.target.value))}
       />
 
-      <label>Max Tokens</label>
+      <Title>Max Tokens</Title>
       <InputField
         type="number"
         min="1"
-        max="2000"
+        max="500"
         value={maxTokens}
-        onChange={(e) => setMaxTokens(parseInt(e.target.value, 10))}
+        onChange={(e) => setMaxTokens(parseInt(e.target.value))}
       />
 
-      <SaveButton onClick={handleSave} disabled={mutation.isPending}>{mutation.isPending ? <Loader /> : "Save"}</SaveButton>
+      <SaveButton onClick={handleSave} disabled={mutation.isPending}>
+        {mutation.isPending ? <Loader /> : "Save"}
+      </SaveButton>
     </Container>
   );
 };

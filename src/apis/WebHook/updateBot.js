@@ -13,14 +13,13 @@ export const updateBot = async (data) => {
   const response = await api.post(
     'api/UpdateBot/',
     {
-      name: 'Ali',
-      role_prompt: data.whyText,
+      name: data.botName,
+      role_prompt: data.improvedLayout ? data.whyText : data.generalPrompt,
       business_rules: data.businessInfo,
       response_text: data.responseText,
       max_token: data.maxTokens,
       temperature: data.temperature,
-      improved_layout: data.improvedLayout,
-      general_prompt: data.generalPrompt
+      improved_layout: data.improvedLayout ? "True" : "False",
     },
     {
       headers: {

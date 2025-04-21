@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { FiRefreshCw, FiX, FiSearch } from "react-icons/fi";
 import { useMutation } from "@tanstack/react-query";
 import { leadConnectIntegrate } from "../../apis/leadConnectIntegrate";
 import { toast } from "react-toastify";
+import { getGHLSubAccounts } from "../../apis/accountList";
+import { disconnectAccount } from "../../apis/disconnectAccount";
 
 const CardContainer = styled.div`
   width: 100%;
@@ -204,23 +206,71 @@ const Loader = styled.div`
   }
 `;
 
+export const LoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+export const ListLoader = styled.div`
+  border: 4px solid #0056b3;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const useExtractTokenAndLocation = () => {
+  const { search } = useLocation();
+  const [accessToken, setAccessToken] = useState(null);
+  const [locationId, setLocationId] = useState(null);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(search);
+    const dataParam = queryParams.get('data');
+
+    if (dataParam) {
+      try {
+        const decodedData = decodeURIComponent(dataParam);
+        const parsedData = JSON.parse(decodedData);
+        const access_token = parsedData?.access_token || null;
+        const locationId = parsedData?.locationId || null;
+
+        setAccessToken(access_token);
+        setLocationId(locationId);
+
+        console.log('✅ access_token:', access_token);
+        console.log('✅ location_id:', locationId);
+      } catch (err) {
+        console.error('❌ Failed to parse `data` param:', err);
+      }
+    } else {
+      console.warn('⚠️ `data` query param not found.');
+    }
+  }, [search]);
+
+  return { accessToken, locationId };
+};
+
 const LeadConnector = () => {
-  // const token = localStorage.getItem("authToken");
-  const [selectedItems, setSelectedItems] = useState([
-    { id: 1, title: "AI Automation HQ", subtitle: "RRYOIUu546orj9aXOzw" },
-  ]);
-  const [items] = useState([
-    { id: 1, title: "AI Automation HQ", subtitle: "RRYOIUu546orj9aXOzw" },
-    { id: 2, title: "Tech Innovations", subtitle: "123ABCxyZ456" },
-    { id: 3, title: "Marketing Insights", subtitle: "qwerty0987lkj" },
-    { id: 4, title: "Productivity Hub", subtitle: "zxcvbnm5678poi" },
-  ]);
+  const { accessToken, locationId } = useExtractTokenAndLocation();
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [items] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAddAccountLoading, setIsAddAccountLoading] = useState(false);
+  const [currentLocationId, setCurrentLocationId] = useState(null);
 
-  // Filter items based on search query
   const filteredItems = items
     .filter((item) => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter((item) => item.address.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter((item) => item.city.toLowerCase().includes(searchQuery.toLowerCase()))
     .filter((item) => !selectedItems.some((selected) => selected.id === item.id));
 
   const handleSelectItem = (item) => {
@@ -229,8 +279,22 @@ const LeadConnector = () => {
     setIsDropdownOpen(false);
   };
 
+  const removeAccountMutation = useMutation({
+    mutationFn: disconnectAccount,
+    onSuccess: (data) => {
+      toast.success(data.message || "Sub-account disconnected successfully!");
+      // Optionally remove from state if server confirms successful delete
+      setSelectedItems((prev) => prev.filter((item) => item.id !== currentLocationId));
+    },
+    onError: (error) => {
+      toast.error("Failed to disconnect sub-account.");
+    }
+  });
+  
+
   const handleRemoveItem = (id) => {
-    setSelectedItems(selectedItems.filter((item) => item.id !== id));
+    setCurrentLocationId(id)
+    removeAccountMutation.mutate(id);
   };
 
   const handleRefreshItem = (id) => {
@@ -244,26 +308,47 @@ const LeadConnector = () => {
     }
   };
 
+  const addNewAccountMutation = useMutation({
+    mutationFn: () => {
+      if (!accessToken || !locationId) {
+        throw new Error("Missing access_token or location_id in URL");
+      }
+
+      return getGHLSubAccounts({ access_token: accessToken, location_id: locationId });
+    },
+    onSuccess: (data) => {
+      setIsAddAccountLoading(false);
+      if (data?.sub_accounts[0]?.location) {
+        const { name, companyId, address, city, id } = data?.sub_accounts[0]?.location;
+        const newAccount = {
+          id: Date.now(),
+          title: name,
+          subtitle: companyId,
+          address: address,
+          city: city,
+          id: id
+        };
+        setSelectedItems((prev) => [...prev, newAccount]);
+      } else {
+        toast.error("No subaccount data found.");
+      }
+    },
+  });
+
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (event.target.closest(".search-bar")) return;
-      setIsDropdownOpen(false);
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
+    if (accessToken && locationId) {
+      setIsAddAccountLoading(true);
+      addNewAccountMutation.mutate();
+    }
+  }, [accessToken, locationId]);
 
   const mutation = useMutation({
     mutationFn: leadConnectIntegrate,
     onSuccess: (data) => {
-      console.log("data", data)
       if (data?.auth_url) {
         window.location.href = data.auth_url;
       } else {
         toast.error("Auth URL not found");
-        console.log("data", data)
       }
     },
     onError: (error) => {
@@ -281,40 +366,44 @@ const LeadConnector = () => {
         </TitleContainer>
       </Header>
       <SearchBarContainer>
-      <SearchBar className="search-bar">
-        <SearchIcon />
-        <SearchInput
-          type="text"
-          placeholder="Search previously added..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => setIsDropdownOpen(true)} // Open dropdown on focus
-        />
-        {searchQuery && <ClearButton onClick={() => setSearchQuery("")} />}
-        {isDropdownOpen && (
-          <SelectDropdown>
-            {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <DropdownItem key={item.id} onClick={() => handleSelectItem(item)}>
-                  <ListItem>
-                    <ListItemTitle>{item.title}</ListItemTitle>
-                    <ListItemSubtitle>{item.subtitle}</ListItemSubtitle>
-                  </ListItem>
-                </DropdownItem>
-              ))
-            ) : (
-              <DropdownItem>No results found</DropdownItem>
-            )}
-          </SelectDropdown>
-        )}
-      </SearchBar>
-        or    
+        <SearchBar className="search-bar">
+          <SearchIcon />
+          <SearchInput
+            type="text"
+            placeholder="Search previously added..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setIsDropdownOpen(true)}
+          />
+          {searchQuery && <ClearButton onClick={() => setSearchQuery("")} />}
+          {isDropdownOpen && (
+            <SelectDropdown>
+              {filteredItems.length > 0 ? (
+                filteredItems.map((item) => (
+                  <DropdownItem key={item.id} onClick={() => handleSelectItem(item)}>
+                    <ListItem>
+                      <ListItemTitle>{item.title}</ListItemTitle>
+                      <ListItemSubtitle>{item.subtitle}</ListItemSubtitle>
+                      <ListItemSubtitle>{item.address}</ListItemSubtitle>
+                      <ListItemSubtitle>{item.city}</ListItemSubtitle>
+                    </ListItem>
+                  </DropdownItem>
+                ))
+              ) : (
+                <DropdownItem>No results found</DropdownItem>
+              )}
+            </SelectDropdown>
+          )}
+        </SearchBar>
+        or
         <AddButton onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-      {mutation.isPending ? <Loader /> : "Add New"}
-    </AddButton>
-        </SearchBarContainer>
+          {mutation.isPending ? <Loader /> : "Add New"}
+        </AddButton>
+      </SearchBarContainer>
 
-      {/* Render selected items */}
+      {isAddAccountLoading ? <LoaderContainer><ListLoader /></LoaderContainer> :
+      (
+        <>
       {selectedItems.length > 0 ? (
         selectedItems.map((item) => (
           <ListItem key={item.id}>
@@ -323,11 +412,16 @@ const LeadConnector = () => {
               <FiX size={16} title="Remove" onClick={() => handleRemoveItem(item.id)} />
             </IconActions>
             <ListItemTitle>{item.title}</ListItemTitle>
+            <ListItemSubtitle>{item.id}</ListItemSubtitle>
             <ListItemSubtitle>{item.subtitle}</ListItemSubtitle>
+            <ListItemSubtitle>{item.address}</ListItemSubtitle>
+            <ListItemSubtitle>{item.city}</ListItemSubtitle>
           </ListItem>
         ))
       ) : (
         ""
+      )}
+      </>
       )}
     </CardContainer>
   );

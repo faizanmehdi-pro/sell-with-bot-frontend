@@ -7,6 +7,8 @@ import { leadConnectIntegrate } from "../../apis/leadConnectIntegrate";
 import { toast } from "react-toastify";
 import { getGHLSubAccounts } from "../../apis/accountList";
 import { disconnectAccount } from "../../apis/disconnectAccount";
+import { useQuery } from "@tanstack/react-query";
+import { previousAdded } from "../../apis/previousAdded";
 
 const CardContainer = styled.div`
   width: 100%;
@@ -206,12 +208,13 @@ const Loader = styled.div`
   }
 `;
 
-export const LoaderContainer = styled.div`
+const LoaderContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
 `;
-export const ListLoader = styled.div`
+
+const ListLoader = styled.div`
   border: 4px solid #0056b3;
   border-radius: 50%;
   border-top: 4px solid #fff;
@@ -233,25 +236,17 @@ const useExtractTokenAndLocation = () => {
 
   useEffect(() => {
     const queryParams = new URLSearchParams(search);
-    const dataParam = queryParams.get('data');
+    const dataParam = queryParams.get("data");
 
     if (dataParam) {
       try {
         const decodedData = decodeURIComponent(dataParam);
         const parsedData = JSON.parse(decodedData);
-        const access_token = parsedData?.access_token || null;
-        const locationId = parsedData?.locationId || null;
-
-        setAccessToken(access_token);
-        setLocationId(locationId);
-
-        console.log('✅ access_token:', access_token);
-        console.log('✅ location_id:', locationId);
+        setAccessToken(parsedData?.access_token || null);
+        setLocationId(parsedData?.locationId || null);
       } catch (err) {
-        console.error('❌ Failed to parse `data` param:', err);
+        console.error("❌ Failed to parse `data` param:", err);
       }
-    } else {
-      console.warn('⚠️ `data` query param not found.');
     }
   }, [search]);
 
@@ -261,21 +256,76 @@ const useExtractTokenAndLocation = () => {
 const LeadConnector = () => {
   const { accessToken, locationId } = useExtractTokenAndLocation();
   const [selectedItems, setSelectedItems] = useState([]);
-  const [items] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAddAccountLoading, setIsAddAccountLoading] = useState(false);
   const [currentLocationId, setCurrentLocationId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const {
+    data: filteredResults = [],
+    refetch: refetchFilteredItems,
+  } = useQuery({
+    queryKey: ["ghl_search"],
+    queryFn: async () => {
+      const response = await previousAdded();
+      return response || [];
+    },
+    enabled: false, // We disable this to control when the query runs
+  });
 
-  const filteredItems = items
-    .filter((item) => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
-    .filter((item) => item.address.toLowerCase().includes(searchQuery.toLowerCase()))
-    .filter((item) => item.city.toLowerCase().includes(searchQuery.toLowerCase()))
-    .filter((item) => !selectedItems.some((selected) => selected.id === item.id));
+  useEffect(() => {
+    if (accessToken && locationId) {
+      refetchFilteredItems(); // Manually trigger the query to fetch data
+    }
+  }, [accessToken, locationId, refetchFilteredItems]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".search-bar")) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  const handleSearchFocus = () => {
+    setIsDropdownOpen(true);
+    setSearchLoading(true); // Start loading when focus happens
+    refetchFilteredItems().finally(() => {
+      setSearchLoading(false); // Stop loading once the refetch is done
+    });
+  };
+
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value); // Update search query
+  };
+
+  const filteredItems = filteredResults.filter((item) => {
+    const isSelected = selectedItems.some((selected) => selected.id === item.location_id);
+    const matchesSearch = (
+      (item.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.location_id || "").toLowerCase().includes(searchQuery.toLowerCase())
+      // (item.address || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // (item.city || "").toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return !isSelected && matchesSearch;
+  });
 
   const handleSelectItem = (item) => {
-    setSelectedItems([...selectedItems, item]);
-    setSearchQuery("");
+    const alreadyExists = selectedItems.some((selected) => selected.id === item.location_id);
+    if (!alreadyExists) {
+      setSelectedItems((prev) => [
+        ...prev,
+        {
+          id: item.location_id,
+          title: item.name,
+          subtitle: item.company_id,
+          address: item.address,
+          city: item.city,
+        },
+      ]);
+    }
     setIsDropdownOpen(false);
   };
 
@@ -283,25 +333,23 @@ const LeadConnector = () => {
     mutationFn: disconnectAccount,
     onSuccess: (data) => {
       toast.success(data.message || "Sub-account disconnected successfully!");
-      // Optionally remove from state if server confirms successful delete
       setSelectedItems((prev) => prev.filter((item) => item.id !== currentLocationId));
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("Failed to disconnect sub-account.");
-    }
+    },
   });
-  
 
   const handleRemoveItem = (id) => {
-    setCurrentLocationId(id)
+    setCurrentLocationId(id);
     removeAccountMutation.mutate(id);
   };
 
   const handleRefreshItem = (id) => {
-    const item = items.find((item) => item.id === id);
+    const item = selectedItems.find((item) => item.id === id);
     if (item) {
-      setSelectedItems(
-        selectedItems.map((selectedItem) =>
+      setSelectedItems((prev) =>
+        prev.map((selectedItem) =>
           selectedItem.id === id ? { ...selectedItem } : selectedItem
         )
       );
@@ -313,25 +361,30 @@ const LeadConnector = () => {
       if (!accessToken || !locationId) {
         throw new Error("Missing access_token or location_id in URL");
       }
-
       return getGHLSubAccounts({ access_token: accessToken, location_id: locationId });
     },
     onSuccess: (data) => {
       setIsAddAccountLoading(false);
       if (data?.sub_accounts[0]?.location) {
-        const { name, companyId, address, city, id } = data?.sub_accounts[0]?.location;
+        const location = data.sub_accounts[0].location;
         const newAccount = {
-          id: Date.now(),
-          title: name,
-          subtitle: companyId,
-          address: address,
-          city: city,
-          id: id
+          id: location.id,
+          title: location.name,
+          subtitle: location.companyId,
+          address: location.address,
+          city: location.city,
         };
-        setSelectedItems((prev) => [...prev, newAccount]);
+        setSelectedItems((prev) =>
+          prev.some((item) => item.id === newAccount.id) ? prev : [...prev, newAccount]
+        );
+        setIsDropdownOpen(false);
       } else {
         toast.error("No subaccount data found.");
       }
+    },
+    onError: () => {
+      setIsAddAccountLoading(false);
+      toast.error("Failed to fetch sub-accounts.");
     },
   });
 
@@ -351,8 +404,8 @@ const LeadConnector = () => {
         toast.error("Auth URL not found");
       }
     },
-    onError: (error) => {
-      toast.error("Auth URL not found:", error);
+    onError: () => {
+      toast.error("Auth URL not found");
     },
   });
 
@@ -371,21 +424,20 @@ const LeadConnector = () => {
           <SearchInput
             type="text"
             placeholder="Search previously added..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setIsDropdownOpen(true)}
+            value={searchQuery} // Bind value to searchQuery
+            onChange={handleInputChange}
+            onFocus={handleSearchFocus}
           />
-          {searchQuery && <ClearButton onClick={() => setSearchQuery("")} />}
           {isDropdownOpen && (
             <SelectDropdown>
-              {filteredItems.length > 0 ? (
+              {searchLoading ? (
+                <DropdownItem><ListLoader /></DropdownItem>
+              ) : filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
-                  <DropdownItem key={item.id} onClick={() => handleSelectItem(item)}>
+                  <DropdownItem key={item.location_id} onClick={() => handleSelectItem(item)}>
                     <ListItem>
-                      <ListItemTitle>{item.title}</ListItemTitle>
-                      <ListItemSubtitle>{item.subtitle}</ListItemSubtitle>
-                      <ListItemSubtitle>{item.address}</ListItemSubtitle>
-                      <ListItemSubtitle>{item.city}</ListItemSubtitle>
+                      <ListItemTitle>{item.name}</ListItemTitle>
+                      <ListItemSubtitle>{item.location_id}</ListItemSubtitle>
                     </ListItem>
                   </DropdownItem>
                 ))
@@ -401,10 +453,9 @@ const LeadConnector = () => {
         </AddButton>
       </SearchBarContainer>
 
-      {isAddAccountLoading ? <LoaderContainer><ListLoader /></LoaderContainer> :
-      (
-        <>
-      {selectedItems.length > 0 ? (
+      {isAddAccountLoading ? (
+        <LoaderContainer><ListLoader /></LoaderContainer>
+      ) : (
         selectedItems.map((item) => (
           <ListItem key={item.id}>
             <IconActions>
@@ -413,15 +464,8 @@ const LeadConnector = () => {
             </IconActions>
             <ListItemTitle>{item.title}</ListItemTitle>
             <ListItemSubtitle>{item.id}</ListItemSubtitle>
-            <ListItemSubtitle>{item.subtitle}</ListItemSubtitle>
-            <ListItemSubtitle>{item.address}</ListItemSubtitle>
-            <ListItemSubtitle>{item.city}</ListItemSubtitle>
           </ListItem>
         ))
-      ) : (
-        ""
-      )}
-      </>
       )}
     </CardContainer>
   );

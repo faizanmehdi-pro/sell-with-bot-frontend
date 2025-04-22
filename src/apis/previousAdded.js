@@ -6,17 +6,17 @@ const api = axios.create({
   baseURL,
 });
 
-export const getBotDetails = async (improvedLayout, botID) => {
+export const previousAdded = async () => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User token not found");
 
   const API_KEY = `token ${userToken}`;
 
-  const response = await api.get(`/api/UpdateBot/?improved_layout=${improvedLayout}&bot_id=${botID}`, {
+  const response = await api.get(`/oauth/ghl_search/`, {
     headers: {
       Authorization: API_KEY,
     },
   });
 
-  return response.data;
+  return response.data.previous_accounts;
 };

@@ -108,6 +108,21 @@ const Loader = styled.div`
   }
 `;
 
+const ListLoader = styled.div`
+  border: 4px solid #0056b3;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
 const MainCard = () => {
   const [improvedLayout, setImprovedLayout] = useState(false);
   const [botName, setBotName] = useState("");
@@ -117,10 +132,15 @@ const MainCard = () => {
   const [generalPrompt, setGeneralPrompt] = useState("");
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(500);
+  const [botID, setBotID] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["botDetails", improvedLayout],
-    queryFn: () => getBotDetails(improvedLayout),
+    queryKey: ["botDetails", improvedLayout, botID],
+    queryFn: () => {
+      if (!botID) return Promise.resolve(null); // Prevent API call if botID is invalid
+      return getBotDetails(improvedLayout, botID);
+    },
+    enabled: !!botID, // Only enable the query if botID is truthy
   });
 
   useEffect(() => {
@@ -131,14 +151,18 @@ const MainCard = () => {
     setWhyText(bot.prompt || "");
     setBusinessInfo(bot.business_rules || "");
     setResponseText(bot.response_text || "");
-    setGeneralPrompt(bot.prompt || "");
+    setGeneralPrompt(bot.role_prompt || "");
     setTemperature(bot.temperature ?? 0.7);
     setMaxTokens(bot.max_token ?? 500);
+    setBotID(bot.bot_id || "");  // Set botID from the fetched data
   }, [data]);
 
   const mutation = useMutation({
     mutationFn: updateBot,
-    onSuccess: () => toast.success('Bot updated successfully!'),
+    onSuccess: (data) => {
+      setBotID(data?.bot_id);
+      toast.success('Bot updated successfully!');
+    },
     onError: () => toast.error('Failed to Update Bot!'),
   });
 
@@ -151,11 +175,12 @@ const MainCard = () => {
       temperature,
       maxTokens,
       improvedLayout,
-      generalPrompt
+      generalPrompt,
+      botID, // Include botID in the request payload
     });
   };
 
-  if (isLoading) return <Container>Loading Bot Info...</Container>;
+  if (isLoading) return <Container><ListLoader /></Container>;
 
   return (
     <Container>
@@ -216,12 +241,12 @@ const MainCard = () => {
         </>
       ) : (
         <Section>
-        <Title>Bot Name</Title>
-        <InputField
-          value={botName}
-          onChange={(e) => setBotName(e.target.value)}
-          placeholder="Enter Bot Name"
-        />
+          <Title>Bot Name</Title>
+          <InputField
+            value={botName}
+            onChange={(e) => setBotName(e.target.value)}
+            placeholder="Enter Bot Name"
+          />
           <Title>General Prompt</Title>
           <TextArea
             value={generalPrompt}

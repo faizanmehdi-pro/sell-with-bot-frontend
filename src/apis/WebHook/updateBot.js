@@ -10,23 +10,38 @@ export const updateBot = async (data) => {
   const userToken = localStorage.getItem("authToken");
   const API_KEY = `token ${userToken}`;
 
-  const response = await api.post(
-    'api/UpdateBot/',
-    {
+  let payload = {};
+
+  if (data.improvedLayout) {
+    payload = {
       name: data.botName,
-      role_prompt: data.improvedLayout ? data.whyText : data.generalPrompt,
+      prompt: data.whyText,
       business_rules: data.businessInfo,
       response_text: data.responseText,
-      max_token: data.maxTokens,
+      improved_temperature: data.temperature,
+      improved_max_token: data.maxTokens,
+      improved_layout: true,
+    };
+  } else {
+    payload = {
+      name: data.botName,
+      role_prompt: data.generalPrompt,
       temperature: data.temperature,
-      improved_layout: data.improvedLayout ? "True" : "False",
-    },
+      max_token: data.maxTokens,
+      improved_layout: false,
+    };
+  }
+
+  const response = await api.post(
+    "api/UpdateBot/",
+    payload,
     {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         authorization: API_KEY,
       },
     }
   );
+
   return response.data;
 };

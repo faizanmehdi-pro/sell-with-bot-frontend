@@ -9,6 +9,7 @@ import { getGHLSubAccounts } from "../../apis/accountList";
 import { disconnectAccount } from "../../apis/disconnectAccount";
 import { useQuery } from "@tanstack/react-query";
 import { previousAdded } from "../../apis/previousAdded";
+import { reconnectAccount } from "../../apis/reconnectAccount";
 
 const CardContainer = styled.div`
   width: 100%;
@@ -92,18 +93,18 @@ const SearchIcon = styled(FiSearch)`
   color: #999;
 `;
 
-const ClearButton = styled(FiX)`
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #999;
+// const ClearButton = styled(FiX)`
+//   position: absolute;
+//   right: 10px;
+//   top: 50%;
+//   transform: translateY(-50%);
+//   cursor: pointer;
+//   color: #999;
 
-  &:hover {
-    color: #007bff;
-  }
-`;
+//   &:hover {
+//     color: #007bff;
+//   }
+// `;
 
 const SelectDropdown = styled.div`
   position: absolute;
@@ -312,22 +313,35 @@ const LeadConnector = () => {
     return !isSelected && matchesSearch;
   });
 
+  const reconnectAccountMutation = useMutation({
+    mutationFn: reconnectAccount,
+    onSuccess: (data) => {
+      toast.success(data?.message || "Account Reconnected Successfully!");
+    },
+    onError: (error) => {
+      const errorMessage =
+        error?.response?.data?.error || "Failed to Reconnect Account.";
+      toast.error(errorMessage);
+    },
+  });
+  
+
   const handleSelectItem = (item) => {
     const alreadyExists = selectedItems.some((selected) => selected.id === item.location_id);
     if (!alreadyExists) {
-      setSelectedItems((prev) => [
-        ...prev,
-        {
-          id: item.location_id,
-          title: item.name,
-          subtitle: item.company_id,
-          address: item.address,
-          city: item.city,
-        },
-      ]);
+      const newItem = {
+        id: item.location_id,
+        title: item.name,
+        subtitle: item.company_id,
+        address: item.address,
+        city: item.city,
+      };
+  
+      setSelectedItems((prev) => [...prev, newItem]);
+      reconnectAccountMutation.mutate({ location_id: newItem.id }); // <-- API call
     }
     setIsDropdownOpen(false);
-  };
+  };  
 
   const removeAccountMutation = useMutation({
     mutationFn: disconnectAccount,

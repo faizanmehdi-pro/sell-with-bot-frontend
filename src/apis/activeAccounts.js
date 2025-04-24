@@ -6,13 +6,13 @@ const api = axios.create({
   baseURL,
 });
 
-export const getBotDetails = async (improvedLayout) => {
+export const activeAccounts = async () => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User token not found");
 
   const API_KEY = `token ${userToken}`;
 
-  const response = await api.get(`/api/UpdateBot/?improved_layout=${improvedLayout}`, {
+  const response = await api.get(`/oauth/active-accounts/`, {
     headers: {
       Authorization: API_KEY,
     },

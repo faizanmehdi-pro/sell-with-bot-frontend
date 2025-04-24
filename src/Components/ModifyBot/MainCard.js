@@ -132,17 +132,12 @@ const MainCard = () => {
   const [generalPrompt, setGeneralPrompt] = useState("");
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(500);
-  const [botID, setBotID] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["botDetails", improvedLayout, botID],
-    queryFn: () => {
-      if (!botID) return Promise.resolve(null); // Prevent API call if botID is invalid
-      return getBotDetails(improvedLayout, botID);
-    },
-    enabled: !!botID, // Only enable the query if botID is truthy
+    queryKey: ["botDetails", improvedLayout],
+    queryFn: () => getBotDetails(improvedLayout),
   });
-
+  
   useEffect(() => {
     if (!data) return;
     const bot = data.bot || {};
@@ -154,13 +149,11 @@ const MainCard = () => {
     setGeneralPrompt(bot.role_prompt || "");
     setTemperature(bot.temperature ?? 0.7);
     setMaxTokens(bot.max_token ?? 500);
-    setBotID(bot.bot_id || "");  // Set botID from the fetched data
-  }, [data]);
+  }, [data]);  
 
   const mutation = useMutation({
     mutationFn: updateBot,
-    onSuccess: (data) => {
-      setBotID(data?.bot_id);
+    onSuccess: () => {
       toast.success('Bot updated successfully!');
     },
     onError: () => toast.error('Failed to Update Bot!'),
@@ -176,7 +169,6 @@ const MainCard = () => {
       maxTokens,
       improvedLayout,
       generalPrompt,
-      botID, // Include botID in the request payload
     });
   };
 

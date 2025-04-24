@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { FiRefreshCw, FiX, FiSearch } from "react-icons/fi";
 import { useMutation } from "@tanstack/react-query";
 import { leadConnectIntegrate } from "../../apis/leadConnectIntegrate";
 import { toast } from "react-toastify";
-import { getGHLSubAccounts } from "../../apis/accountList";
 import { disconnectAccount } from "../../apis/disconnectAccount";
 import { useQuery } from "@tanstack/react-query";
 import { previousAdded } from "../../apis/previousAdded";
 import { reconnectAccount } from "../../apis/reconnectAccount";
+import { activeAccounts } from "../../apis/activeAccounts";
 
 const CardContainer = styled.div`
   width: 100%;
@@ -230,32 +230,7 @@ const ListLoader = styled.div`
   }
 `;
 
-const useExtractTokenAndLocation = () => {
-  const { search } = useLocation();
-  const [accessToken, setAccessToken] = useState(null);
-  const [locationId, setLocationId] = useState(null);
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams(search);
-    const dataParam = queryParams.get("data");
-
-    if (dataParam) {
-      try {
-        const decodedData = decodeURIComponent(dataParam);
-        const parsedData = JSON.parse(decodedData);
-        setAccessToken(parsedData?.access_token || null);
-        setLocationId(parsedData?.locationId || null);
-      } catch (err) {
-        console.error("❌ Failed to parse `data` param:", err);
-      }
-    }
-  }, [search]);
-
-  return { accessToken, locationId };
-};
-
 const LeadConnector = () => {
-  const { accessToken, locationId } = useExtractTokenAndLocation();
   const [selectedItems, setSelectedItems] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAddAccountLoading, setIsAddAccountLoading] = useState(false);
@@ -271,14 +246,8 @@ const LeadConnector = () => {
       const response = await previousAdded();
       return response || [];
     },
-    enabled: false, // We disable this to control when the query runs
+    enabled: false,
   });
-
-  useEffect(() => {
-    if (accessToken && locationId) {
-      refetchFilteredItems(); // Manually trigger the query to fetch data
-    }
-  }, [accessToken, locationId, refetchFilteredItems]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -372,42 +341,38 @@ const LeadConnector = () => {
 
   const addNewAccountMutation = useMutation({
     mutationFn: () => {
-      if (!accessToken || !locationId) {
-        throw new Error("Missing access_token or location_id in URL");
-      }
-      return getGHLSubAccounts({ access_token: accessToken, location_id: locationId });
+      return activeAccounts();
     },
     onSuccess: (data) => {
       setIsAddAccountLoading(false);
-      if (data?.sub_accounts[0]?.location) {
-        const location = data.sub_accounts[0].location;
+      if (data?.active_accounts?.length > 0) {
+        const location = data.active_accounts[0];
         const newAccount = {
-          id: location.id,
+          id: location.location_id,
           title: location.name,
-          subtitle: location.companyId,
-          address: location.address,
-          city: location.city,
         };
         setSelectedItems((prev) =>
           prev.some((item) => item.id === newAccount.id) ? prev : [...prev, newAccount]
         );
         setIsDropdownOpen(false);
       } else {
-        toast.error("No subaccount data found.");
+        setIsAddAccountLoading(false);
       }
     },
     onError: () => {
       setIsAddAccountLoading(false);
-      toast.error("Failed to fetch sub-accounts.");
     },
   });
+  
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    if (accessToken && locationId) {
+    if (!hasFetchedRef.current) {
+      hasFetchedRef.current = true;
       setIsAddAccountLoading(true);
       addNewAccountMutation.mutate();
     }
-  }, [accessToken, locationId]);
+  }, []); 
 
   const mutation = useMutation({
     mutationFn: leadConnectIntegrate,

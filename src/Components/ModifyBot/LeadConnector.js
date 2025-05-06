@@ -346,14 +346,17 @@ const LeadConnector = () => {
     onSuccess: (data) => {
       setIsAddAccountLoading(false);
       if (data?.active_accounts?.length > 0) {
-        const location = data.active_accounts[0];
-        const newAccount = {
-          id: location.location_id,
-          title: location.name,
-        };
-        setSelectedItems((prev) =>
-          prev.some((item) => item.id === newAccount.id) ? prev : [...prev, newAccount]
-        );
+        const newAccounts = data.active_accounts
+          .filter((location) => !selectedItems.some((item) => item.id === location.location_id))
+          .map((location) => ({
+            id: location.location_id,
+            title: location.name,
+          }));
+      
+        if (newAccounts.length > 0) {
+          setSelectedItems((prev) => [...prev, ...newAccounts]);
+        }
+      
         setIsDropdownOpen(false);
       } else {
         setIsAddAccountLoading(false);

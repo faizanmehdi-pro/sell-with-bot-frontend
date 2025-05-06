@@ -7,8 +7,13 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { Loader } from "./LoginForm";
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+import axios from "axios";
+import { GoogleLogin } from "@react-oauth/google";
+import { useAuth } from "../../Components/Auth/AuthContext";
+
+
 
 // Styled components (same as before)
 const Container = styled.div`
@@ -184,6 +189,15 @@ const ErrorText = styled.p`
   margin: 5px 2px;
 `;
 
+const GoogleLoginWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+`;
+
+
+
 // Yup validation schema
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is required"),
@@ -198,9 +212,35 @@ const validationSchema = Yup.object().shape({
 });
 
 const Signup = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
+  const handleSuccess = async (credentialResponse) => {
+    const idToken = credentialResponse.credential;
+
+    try {
+      const response = await axios.post("http://54.197.41.35/api/auth/google-login/", {
+        id_token: idToken,
+      });
+      
+
+      toast.success("Google login successfully!");
+      navigate("/dashboard");
+      
+      login(response?.data?.token);
+      localStorage.setItem("user-ID", response?.data?.user_id)
+    } catch (error) {
+      console.error("Login failed", error);
+      toast.error("Google login failed");
+    }
+  };
+
+  const handleError = () => {
+    toast.error("Google login was unsuccessful. Try again.");
+  };
+  
 
   const handleSubmit = async (values, { setSubmitting }) => {
     setError("");
@@ -390,6 +430,13 @@ const Signup = () => {
         <LinkText>
           Already have an account? <Link to="/">Sign in</Link>
         </LinkText>
+        <LinkText>
+          OR
+        </LinkText>
+        <GoogleLoginWrapper>
+        <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+        </GoogleLoginWrapper>
+
       </SignupBox>
     </Container>
   );

@@ -8,6 +8,8 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 const Container = styled.div`
   display: flex;
@@ -155,6 +157,13 @@ export const Loader = styled.div`
   }
 `;
 
+const GoogleLoginWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+`;
+
 // Yup validation schema
 const validationSchema = Yup.object({
   email: Yup.string().email("Invalid email format").required("Email is required"),
@@ -165,6 +174,30 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+
+    const handleSuccess = async (credentialResponse) => {
+      const idToken = credentialResponse.credential;
+  
+      try {
+        const response = await axios.post("http://54.197.41.35/api/auth/google-login/", {
+          id_token: idToken,
+        });
+        
+  
+        toast.success("Google login successfully!");
+        navigate("/dashboard");
+        
+        login(response?.data?.token);
+        localStorage.setItem("user-ID", response?.data?.user_id)
+      } catch (error) {
+        console.error("Login failed", error);
+        toast.error("Google login failed");
+      }
+    };
+  
+    const handleError = () => {
+      toast.error("Google login was unsuccessful. Try again.");
+    };
 
   const mutation = useMutation({
     mutationFn: loginUser,
@@ -223,6 +256,12 @@ const Login = () => {
         <LinkText>
           Don't have an account? <Link to="/sign-up">Sign up</Link>
         </LinkText>
+                <LinkText>
+                  OR
+                </LinkText>
+                <GoogleLoginWrapper>
+                <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+                </GoogleLoginWrapper>
       </LoginBox>
     </Container>
   );

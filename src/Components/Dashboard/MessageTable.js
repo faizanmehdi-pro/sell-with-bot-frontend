@@ -1,6 +1,10 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { ImArrowDownLeft, ImArrowUpRight  } from "react-icons/im";
+import { ImArrowDownLeft, ImArrowUpRight } from "react-icons/im";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { chatTableHistory } from "../../apis/chatTableHistory";
+import { FaSpinner } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   display: flex;
@@ -48,20 +52,162 @@ const TableHeader = styled.th`
 const TableCell = styled.td`
   padding: 12px;
   border: 1px solid #ddd;
+  min-width: 120px;
   word-wrap: break-word;
 `;
 
-const MessageTable = () => {
-    const [search, setSearch] = useState("");
-    const data = [
-        { id: "M31gY12as...", time: "02/24 18:43:1", direction: "incoming", message: "Great, this will only take 2-3 minutes. Do you already have freelancing experience, or are you just getting started?", attempt: "name", cost: "$0.04" },
-        { id: "M31gY25as...", time: "02/24 18:43:1", direction: "outgoing", message: "hello", attempt: "", cost: "$0.04" },
-        { id: "03jYW55as...", time: "02/01 23:28:5", direction: "incoming", message: "Thank you for the link! Before I proceed, could you please share your email address so I can keep you updated?", attempt: "email", cost: "$0.04" },
-      ];
+const ToggleWrapper = styled.div`
+  position: relative;
+  width: 60px;
+  height: 30px;
+  border-radius: 34px;
+  background-color: ${(props) => (props.active ? "#007bff" : "#dc3545")};
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 5px;
+  box-sizing: border-box;
+`;
 
-      const filteredData = data.filter((item) =>
-        item.id.toLowerCase().includes(search.toLowerCase())
-      );
+const ToggleTextON = styled.span`
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  display: ${(props) => (props.active ? "block" : "none")};
+  position: absolute;
+  left: 6px;
+`;
+
+const ToggleTextOFF = styled.span`
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  display: ${(props) => (props.active ? "none" : "block")};
+  position: absolute;
+  right: 6px;
+`;
+
+const ToggleThumb = styled.div`
+  position: absolute;
+  top: 2px;
+  left: ${(props) => (props.active ? "32px" : "2px")};
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  transition: left 0.3s;
+  z-index: 1;
+`;
+
+const Spinner = styled(FaSpinner)`
+  color: white;
+  font-size: 12px;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  @keyframes spin {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+`;
+
+const ListLoader = styled.div`
+  border: 4px solid #0056b3;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const MessageTable = () => {
+  const userToken = localStorage.getItem("authToken");
+  const API_KEY = `token ${userToken}`;
+  const [search, setSearch] = useState("");
+  const [loadingIndex, setLoadingIndex] = useState(null);
+  const queryClient = useQueryClient();
+
+  const toggleBotStatusMutation = useMutation({
+    mutationFn: async ({ contact_id, bot_id, status }) => {
+      const response = await fetch("http://54.197.41.35/api/off-chat/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: API_KEY,
+        },
+        body: JSON.stringify({ contact_id, bot_id, status }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update status");
+      }
+
+      return response.json(); // assuming this returns { message: "...", ... }
+    },
+
+    onMutate: (variables) => {
+      setLoadingIndex(variables.index);
+    },
+
+    onSuccess: (response) => {
+      toast.success(response.message || "Bot status updated successfully");
+    },
+
+    onError: (error) => {
+      toast.error(`Failed to update bot status: ${error.message}`);
+    },
+
+    onSettled: () => {
+      setLoadingIndex(null);
+      queryClient.invalidateQueries(["chatResults"]);
+    },
+  });
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["chatResults"],
+    queryFn: chatTableHistory,
+  });
+
+  // if (isLoading) return <Container><ListLoader /></Container>; 
+
+  const filteredData = Array.isArray(data)
+    ? data.filter((item) =>
+        item.contact_id?.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
+
+  const toggleStatus = (index) => {
+    const selected = filteredData[index];
+    const newStatus = selected.status === "True" ? false : true;
+
+    toggleBotStatusMutation.mutate({
+      contact_id: selected.contact_id,
+      bot_id: selected.bot_id,
+      status: newStatus,
+      index, // pass index for tracking
+    });
+  };
+
   return (
     <Container>
       <SearchBar
@@ -74,28 +220,81 @@ const MessageTable = () => {
         <StyledTable>
           <TableHead>
             <tr>
-            <TableHeader>Contact ID</TableHeader>
-            <TableHeader>Time</TableHeader>
-            <TableHeader>Direction</TableHeader>
-            <TableHeader>Message</TableHeader>
-            <TableHeader>Attempt</TableHeader>
-            <TableHeader>Cost</TableHeader>
-          </tr>
+              <TableHeader>Contact ID</TableHeader>
+              <TableHeader>Name</TableHeader>
+              <TableHeader>Time</TableHeader>
+              <TableHeader>Direction</TableHeader>
+              <TableHeader>Message</TableHeader>
+              <TableHeader>Bot Status</TableHeader>
+            </tr>
           </TableHead>
-        <tbody>
-          {filteredData.map((msg, index) => (
-            <TableRow key={index}>
-              <TableCell>{msg.id}</TableCell>
-              <TableCell>{msg.time}</TableCell>
-              <TableCell>
-  {msg.direction === "incoming" ? <ImArrowDownLeft /> : <ImArrowUpRight />}
-</TableCell>
-              <TableCell>{msg.message}</TableCell>
-              <TableCell>{msg.attempt}</TableCell>
-              <TableCell>{msg.cost}</TableCell>
-            </TableRow>
-          ))}
-        </tbody>
+          <tbody>
+            {isLoading ? (
+              // ✅ Loader inside table
+              <TableRow>
+                <TableCell colSpan="6">
+                  <ListLoader />
+                </TableCell>
+              </TableRow>
+            ) : filteredData.length === 0 ? (
+              // ✅ No results message
+              <TableRow>
+                <TableCell colSpan="6">
+                  No Results Found
+                </TableCell>
+              </TableRow>
+            ) : (
+              // ✅ Actual rows
+              filteredData.map((msg, index) => (
+                <TableRow key={index}>
+                  <TableCell>{msg.contact_id}</TableCell>
+                  <TableCell>{msg.contact_name || "N/A"}</TableCell>
+                  <TableCell>{msg.time}</TableCell>
+                  <TableCell>
+                    {msg.direction === "incoming" ? (
+                      <ImArrowDownLeft />
+                    ) : (
+                      <ImArrowUpRight />
+                    )}
+                  </TableCell>
+                  <TableCell>{msg.message}</TableCell>
+                  <TableCell align="center">
+                    <ToggleWrapper
+                      active={msg.status === "True" || msg.status === true}
+                      onClick={() => toggleStatus(index)}
+                      style={{ opacity: loadingIndex === index ? 0.6 : 1 }}
+                    >
+                      {loadingIndex === index ? (
+                        <Spinner />
+                      ) : (
+                        <>
+                          <ToggleTextON
+                            active={
+                              msg.status === "True" || msg.status === true
+                            }
+                          >
+                            ON
+                          </ToggleTextON>
+                          <ToggleTextOFF
+                            active={
+                              msg.status === "True" || msg.status === true
+                            }
+                          >
+                            OFF
+                          </ToggleTextOFF>
+                          <ToggleThumb
+                            active={
+                              msg.status === "True" || msg.status === true
+                            }
+                          />
+                        </>
+                      )}
+                    </ToggleWrapper>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </tbody>
         </StyledTable>
       </TableContainer>
     </Container>

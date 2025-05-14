@@ -10,6 +10,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import { useQueryClient } from '@tanstack/react-query';
 
 const Container = styled.div`
   display: flex;
@@ -171,6 +172,7 @@ const validationSchema = Yup.object({
 });
 
 const Login = () => {
+  const queryClient = useQueryClient();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -189,6 +191,8 @@ const Login = () => {
         
         login(response?.data?.token);
         localStorage.setItem("user-ID", response?.data?.user_id)
+        localStorage.setItem("userName", response?.data?.email)
+        queryClient.removeQueries({ queryKey: ["botDetails"] });
       } catch (error) {
         console.error("Login failed", error);
         toast.error("Google login failed");
@@ -206,6 +210,8 @@ const Login = () => {
       navigate("/dashboard");
       toast.success("User Login Successfully!");
       localStorage.setItem("user-ID", data.user_id)
+      localStorage.setItem("userName", data?.email)
+      queryClient.removeQueries({ queryKey: ["botDetails"] });
     },
     onError: (error) => {
       toast.error(error.message);

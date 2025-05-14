@@ -25,6 +25,10 @@ import { Logout } from '@mui/icons-material';
 import styled from 'styled-components';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { toast } from 'react-toastify';
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { useQueryClient } from '@tanstack/react-query';
 
 const topbarColor = '#1976d2';
 const inactiveColor = '#000';
@@ -46,16 +50,33 @@ const getTitleFromPath = (path) => {
 };
 
 function MainDrawer() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [modifyBotOpen, setModifyBotOpen] = React.useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
-  const navigate = useNavigate();
 
+  const userName = localStorage.getItem('userName') || 'User';
+  const userInitial = userName.charAt(0).toUpperCase();
+  
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  
+  const handleAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  
   const handleLogout = () => {
+    queryClient.clear();
     localStorage.removeItem('authToken');
+    localStorage.removeItem('userName'); // Optional
     navigate('/');
-    toast.success("User Logout Successfully!")
+    toast.success("User Logout Successfully!");
   };
 
   const handleDrawerToggle = () => {
@@ -133,12 +154,45 @@ function MainDrawer() {
             {getTitleFromPath(location.pathname)}
           </Typography>
           <Box sx={{ flexGrow: 0, ml: 'auto' }}>
-            <Tooltip title="Logout">
-              <IconButton onClick={handleLogout} sx={{ textAlign: 'center', color: '#fff' }}>
-                <Logout />
-              </IconButton>
-            </Tooltip>
-          </Box>
+  <Tooltip title="Account settings">
+    <IconButton onClick={handleAvatarClick} sx={{ p: 0 }}>
+      <Avatar sx={{ bgcolor: '#fff', color: topbarColor }}>{userInitial}</Avatar>
+    </IconButton>
+  </Tooltip>
+  <Menu
+    anchorEl={anchorEl}
+    open={open}
+    onClose={handleMenuClose}
+    onClick={handleMenuClose}
+    PaperProps={{
+      elevation: 4,
+      sx: {
+        mt: 1.5,
+        overflow: 'visible',
+        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+        '& .MuiAvatar-root': {
+          width: 32,
+          height: 32,
+          ml: -0.5,
+          mr: 1,
+        },
+      },
+    }}
+    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+  >
+    <MenuItem disabled>
+      <Typography variant="body1">{userName}</Typography>
+    </MenuItem>
+    <Divider />
+    <MenuItem onClick={handleLogout}>
+      <ListItemIcon>
+        <Logout fontSize="small" />
+      </ListItemIcon>
+      Logout
+    </MenuItem>
+  </Menu>
+</Box>
         </Toolbar>
       </AppBar>
       <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }} aria-label="mailbox folders">

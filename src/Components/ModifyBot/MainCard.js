@@ -136,20 +136,24 @@ const MainCard = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["botDetails", improvedLayout],
     queryFn: () => getBotDetails(improvedLayout),
-  });
+    enabled: true,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });  
   
   useEffect(() => {
-    if (!data) return;
-    const bot = data.bot || {};
-    console.log("botData", data, bot);
-    setBotName(bot.name || "");
-    setWhyText(bot.prompt || "");
-    setBusinessInfo(bot.business_rules || "");
-    setResponseText(bot.response_text || "");
-    setGeneralPrompt(bot.role_prompt || "");
-    setTemperature(bot.temperature ?? 0.7);
-    setMaxTokens(bot.max_token ?? 500);
-  }, [data]);  
+    if (data?.bot_data?.bot) {
+      const bot = data.bot_data.bot;
+      setBotName(bot.name || "");
+      setWhyText(bot.prompt || "");
+      setBusinessInfo(bot.business_rules || "");
+      setResponseText(bot.response_text || "");
+      setGeneralPrompt(bot.role_prompt || "");
+      setTemperature(bot.temperature ?? 0.7);
+      setMaxTokens(bot.max_token ?? 500);
+      setImprovedLayout(bot.improved_layout ?? false);
+    }
+  }, [data]);
 
   const mutation = useMutation({
     mutationFn: updateBot,

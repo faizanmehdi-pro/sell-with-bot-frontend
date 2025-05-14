@@ -12,7 +12,7 @@ import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../../Components/Auth/AuthContext";
-
+import { useQueryClient } from '@tanstack/react-query';
 
 
 // Styled components (same as before)
@@ -212,6 +212,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const Signup = () => {
+  const queryClient = useQueryClient();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -231,6 +232,8 @@ const Signup = () => {
       
       login(response?.data?.token);
       localStorage.setItem("user-ID", response?.data?.user_id)
+      localStorage.setItem("userName", response?.data?.email)
+      queryClient.removeQueries({ queryKey: ["botDetails"] });
     } catch (error) {
       console.error("Login failed", error);
       toast.error("Google login failed");

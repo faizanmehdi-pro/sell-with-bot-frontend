@@ -10,7 +10,6 @@ import MessageTable from "./MessageTable";
 const DashboardContainer = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 20px;
   gap: 30px;
 `;
 

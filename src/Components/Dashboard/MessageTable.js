@@ -99,23 +99,19 @@ const ToggleThumb = styled.div`
   background: white;
   transition: left 0.3s;
   z-index: 1;
-`;
+`; 
 
 const Spinner = styled(FaSpinner)`
   color: white;
-  font-size: 12px;
+  font-size: 14px;
   animation: spin 1s linear infinite;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
 
   @keyframes spin {
     0% {
-      transform: translate(-50%, -50%) rotate(0deg);
+      transform: rotate(0deg);
     }
     100% {
-      transform: translate(-50%, -50%) rotate(360deg);
+      transform: rotate(360deg);
     }
   }
 `;
@@ -162,7 +158,7 @@ const MessageTable = () => {
         throw new Error(errorData.message || "Failed to update status");
       }
 
-      return response.json(); // assuming this returns { message: "...", ... }
+      return response.json();
     },
 
     onMutate: (variables) => {
@@ -204,7 +200,7 @@ const MessageTable = () => {
       contact_id: selected.contact_id,
       bot_id: selected.bot_id,
       status: newStatus,
-      index, // pass index for tracking
+      index,
     });
   };
 
@@ -230,21 +226,18 @@ const MessageTable = () => {
           </TableHead>
           <tbody>
             {isLoading ? (
-              // ✅ Loader inside table
               <TableRow>
                 <TableCell colSpan="6">
                   <ListLoader />
                 </TableCell>
               </TableRow>
             ) : filteredData.length === 0 ? (
-              // ✅ No results message
               <TableRow>
                 <TableCell colSpan="6">
                   No Results Found
                 </TableCell>
               </TableRow>
             ) : (
-              // ✅ Actual rows
               filteredData.map((msg, index) => (
                 <TableRow key={index}>
                   <TableCell>{msg.contact_id}</TableCell>

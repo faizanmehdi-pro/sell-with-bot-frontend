@@ -1,51 +1,52 @@
-import * as React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
-import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import MenuIcon from '@mui/icons-material/Menu';
-import { Outlet } from 'react-router-dom';
-import Tooltip from '@mui/material/Tooltip';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import BuildIcon from '@mui/icons-material/Build';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
-import { Logout } from '@mui/icons-material';
-import styled from 'styled-components';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import { toast } from 'react-toastify';
-import Avatar from '@mui/material/Avatar';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import { useQueryClient } from '@tanstack/react-query';
+import * as React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import CssBaseline from "@mui/material/CssBaseline";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import MenuIcon from "@mui/icons-material/Menu";
+import { Outlet } from "react-router-dom";
+import Tooltip from "@mui/material/Tooltip";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import BuildIcon from "@mui/icons-material/Build";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import { Logout } from "@mui/icons-material";
+import styled from "styled-components";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import { toast } from "react-toastify";
+import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import { useQueryClient } from "@tanstack/react-query";
+import logo from "../../assets/images/Logo.png";
 
-const topbarColor = '#1976d2';
-const inactiveColor = '#000';
+const topbarColor = "#1976d2";
+const inactiveColor = "#000";
 const drawerWidth = 290;
 
 const getTitleFromPath = (path) => {
   switch (path) {
-    case '/dashboard':
-      return 'Dashboard';
-    case '/create/modify-bot':
-      return 'Create/Modify Bot';
-    case '/create/modify-bot/integrate':
-      return 'Integrate';
-    case '/create/modify-bot/prompt':
-      return 'Prompt';
+    case "/dashboard":
+      return "Dashboard";
+    case "/create/modify-bot":
+      return "Create/Modify Bot";
+    case "/create/modify-bot/integrate":
+      return "Integrate";
+    case "/create/modify-bot/prompt":
+      return "Prompt";
     default:
-      return 'Page';
+      return "Page";
   }
 };
 
@@ -57,25 +58,25 @@ function MainDrawer() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const userName = localStorage.getItem('userName') || 'User';
+  const userName = localStorage.getItem("userName") || "User";
   const userInitial = userName.charAt(0).toUpperCase();
-  
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  
+
   const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  
+
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-  
+
   const handleLogout = () => {
     queryClient.clear();
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userName'); // Optional
-    navigate('/');
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userName"); // Optional
+    navigate("/");
     toast.success("User Logout Successfully!");
   };
 
@@ -91,15 +92,26 @@ function MainDrawer() {
     <div>
       <Toolbar>
         <LogoContainer>
-          <h1>Sell with Bot</h1>
+          <img src={logo} alt="logo" />
         </LogoContainer>
       </Toolbar>
       <Divider />
       <List>
         {/* Dashboard Link */}
         <ListItem key="dashboard" disablePadding>
-          <ListItemButton component={Link} to="/dashboard" sx={{ color: currentPath === '/dashboard' ? topbarColor : inactiveColor }}>
-            <ListItemIcon sx={{ color: currentPath === '/dashboard' ? topbarColor : inactiveColor }}>
+          <ListItemButton
+            component={Link}
+            to="/dashboard"
+            sx={{
+              color: currentPath === "/dashboard" ? topbarColor : inactiveColor,
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                color:
+                  currentPath === "/dashboard" ? topbarColor : inactiveColor,
+              }}
+            >
               <DashboardIcon />
             </ListItemIcon>
             <ListItemText primary="Dashboard" />
@@ -123,15 +135,47 @@ function MainDrawer() {
         {/* Sublinks for Modify Bot */}
         {modifyBotOpen && (
           <List component="div" disablePadding sx={{ pl: 4 }}>
-            <ListItemButton component={Link} to="/create/modify-bot/integrate" sx={{ color: currentPath === '/create/modify-bot/integrate' ? topbarColor : inactiveColor }}>
-              <ListItemIcon sx={{ color: currentPath === '/create/modify-bot/integrate' ? topbarColor : inactiveColor }}>
+            <ListItemButton
+              component={Link}
+              to="/create/modify-bot/integrate"
+              sx={{
+                color:
+                  currentPath === "/create/modify-bot/integrate"
+                    ? topbarColor
+                    : inactiveColor,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color:
+                    currentPath === "/create/modify-bot/integrate"
+                      ? topbarColor
+                      : inactiveColor,
+                }}
+              >
                 <AssignmentTurnedInIcon />
               </ListItemIcon>
               <ListItemText primary="Integrate" />
             </ListItemButton>
 
-            <ListItemButton component={Link} to="/create/modify-bot/prompt" sx={{ color: currentPath === '/create/modify-bot/prompt' ? topbarColor : inactiveColor }}>
-              <ListItemIcon sx={{ color: currentPath === '/create/modify-bot/prompt' ? topbarColor : inactiveColor }}>
+            <ListItemButton
+              component={Link}
+              to="/create/modify-bot/prompt"
+              sx={{
+                color:
+                  currentPath === "/create/modify-bot/prompt"
+                    ? topbarColor
+                    : inactiveColor,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color:
+                    currentPath === "/create/modify-bot/prompt"
+                      ? topbarColor
+                      : inactiveColor,
+                }}
+              >
                 <ChatBubbleOutlineIcon />
               </ListItemIcon>
               <ListItemText primary="Prompt" />
@@ -143,59 +187,78 @@ function MainDrawer() {
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ width: { sm: `calc(100% - ${drawerWidth}px)` }, ml: { sm: `${drawerWidth}px` }, backgroundColor: topbarColor }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+          backgroundColor: topbarColor,
+        }}
+      >
         <Toolbar>
-          <IconButton color="inherit" aria-label="open drawer" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: 'none' } }}>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: "none" } }}
+          >
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
             {getTitleFromPath(location.pathname)}
           </Typography>
-          <Box sx={{ flexGrow: 0, ml: 'auto' }}>
-  <Tooltip title="Account settings">
-    <IconButton onClick={handleAvatarClick} sx={{ p: 0 }}>
-      <Avatar sx={{ bgcolor: '#fff', color: topbarColor }}>{userInitial}</Avatar>
-    </IconButton>
-  </Tooltip>
-  <Menu
-    anchorEl={anchorEl}
-    open={open}
-    onClose={handleMenuClose}
-    onClick={handleMenuClose}
-    PaperProps={{
-      elevation: 4,
-      sx: {
-        mt: 1.5,
-        overflow: 'visible',
-        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-        '& .MuiAvatar-root': {
-          width: 32,
-          height: 32,
-          ml: -0.5,
-          mr: 1,
-        },
-      },
-    }}
-    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-  >
-    <MenuItem disabled>
-      <Typography variant="body1">{userName}</Typography>
-    </MenuItem>
-    <Divider />
-    <MenuItem onClick={handleLogout}>
-      <ListItemIcon>
-        <Logout fontSize="small" />
-      </ListItemIcon>
-      Logout
-    </MenuItem>
-  </Menu>
-</Box>
+          <Box sx={{ flexGrow: 0, ml: "auto" }}>
+            <Tooltip title="Account settings">
+              <IconButton onClick={handleAvatarClick} sx={{ p: 0 }}>
+                <Avatar sx={{ bgcolor: "#fff", color: topbarColor }}>
+                  {userInitial}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleMenuClose}
+              onClick={handleMenuClose}
+              PaperProps={{
+                elevation: 4,
+                sx: {
+                  mt: 1.5,
+                  overflow: "visible",
+                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                  "& .MuiAvatar-root": {
+                    width: 32,
+                    height: 32,
+                    ml: -0.5,
+                    mr: 1,
+                  },
+                },
+              }}
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+              <MenuItem disabled>
+                <Typography variant="body1">{userName}</Typography>
+              </MenuItem>
+              <Divider />
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <Logout fontSize="small" />
+                </ListItemIcon>
+                Logout
+              </MenuItem>
+            </Menu>
+          </Box>
         </Toolbar>
       </AppBar>
-      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }} aria-label="mailbox folders">
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
         {/* Mobile Drawer */}
         <Drawer
           variant="temporary"
@@ -205,8 +268,11 @@ function MainDrawer() {
             keepMounted: true, // Better open performance on mobile
           }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
           }}
         >
           {drawer}
@@ -216,8 +282,11 @@ function MainDrawer() {
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
           }}
           open
         >

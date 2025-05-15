@@ -11,6 +11,7 @@ import * as Yup from "yup";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useQueryClient } from '@tanstack/react-query';
+import logo from '../../assets/images/Logo.png'
 
 const Container = styled.div`
   display: flex;
@@ -28,17 +29,21 @@ const LoginBox = styled.div`
   text-align: center;
   max-width: 400px;
   width: 100%;
+
+  img{
+    margin-bottom: 10px;
+  }
 `;
 
-const Heading = styled.h1`
-  font-size: 32px;
-  font-weight: bold;
-  color: #007bff;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
-  margin-bottom: 20px;
-`;
+// const Heading = styled.h1`
+//   font-size: 32px;
+//   font-weight: bold;
+//   color: #007bff;
+//   text-transform: uppercase;
+//   letter-spacing: 2px;
+//   text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
+//   margin-bottom: 20px;
+// `;
 
 const StyledForm = styled(Form)`
   display: flex;
@@ -221,8 +226,8 @@ const Login = () => {
   return (
     <Container>
       <LoginBox>
-        <Heading>Sell with Bot</Heading>
-
+        <img src={logo} alt="logo" />
+        {/* <Heading>Sell with Bot</Heading> */}
         <Formik
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchema}

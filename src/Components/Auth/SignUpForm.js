@@ -13,6 +13,7 @@ import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../../Components/Auth/AuthContext";
 import { useQueryClient } from '@tanstack/react-query';
+import logo from '../../assets/images/Logo.png'
 
 
 // Styled components (same as before)
@@ -25,22 +26,33 @@ const Container = styled.div`
   min-height: 100vh;
 `;
 
+const LogoContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+
+  img{
+  max-width: 400px;
+  }
+`;
+
 const SignupBox = styled.div`
   text-align: center;
   max-width: 700px;
   width: 100%;
 `;
 
-const Heading = styled.h1`
-  font-size: 32px;
-  font-weight: bold;
-  color: #007bff;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
-  margin-bottom: 20px;
-  text-align: left;
-`;
+// const Heading = styled.h1`
+//   font-size: 32px;
+//   font-weight: bold;
+//   color: #007bff;
+//   text-transform: uppercase;
+//   letter-spacing: 2px;
+//   text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
+//   margin-bottom: 20px;
+//   text-align: left;
+// `;
 
 const SubText = styled.p`
   font-size: 14px;
@@ -274,7 +286,10 @@ const Signup = () => {
   return (
     <Container>
       <SignupBox>
-        <Heading>Sell with Bot</Heading>
+        <LogoContainer>
+      <img src={logo} alt="logo" />
+      </LogoContainer>
+        {/* <Heading>Sell with Bot</Heading> */}
         {error && <SubText style={{ color: "red" }}>{error}</SubText>}
 
         <Formik

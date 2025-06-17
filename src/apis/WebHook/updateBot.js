@@ -20,6 +20,8 @@ export const updateBot = async (data) => {
       response_text: data.responseText,
       improved_temperature: data.temperature,
       improved_max_token: data.maxTokens,
+      role: data.role,
+      goal: data.goal,
       improved_layout: true,
     };
   } else {
@@ -32,16 +34,12 @@ export const updateBot = async (data) => {
     };
   }
 
-  const response = await api.post(
-    "api/UpdateBot/",
-    payload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        authorization: API_KEY,
-      },
-    }
-  );
+  const response = await api.post("api/UpdateBot/", payload, {
+    headers: {
+      "Content-Type": "application/json",
+      authorization: API_KEY,
+    },
+  });
 
   return response.data;
 };

@@ -1,58 +1,118 @@
 import React from "react";
-import { FaRegCreditCard, FaCheckCircle, FaReply, FaCalendarCheck } from "react-icons/fa";
-import { MdOutlineMonetizationOn } from "react-icons/md";
-import StatCard from "./StatsCards";
-import ChartSection from "./ChartSection";
-
+import { useQuery } from "@tanstack/react-query";
 import styled from "styled-components";
-import MessageTable from "./MessageTable";
+import StatCard from "./StatsCards";
+import EngagementChart from "./ChartSection";
+import { getDashboaedData } from "../../apis/getDashboaedData";
+import TCL from '../../assets/Dashboard/TotalCreditLeft.png'
+import CU from '../../assets/Dashboard/CreditUsed.png'
+import Responses from '../../assets/Dashboard/Responses.png'
+import Respond from '../../assets/Dashboard/Respond.png'
+import Appointments from '../../assets/Dashboard/Appointment.png'
+import Chat from '../../assets/Dashboard/Chat.png'
 
 const DashboardContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 30px;
+  padding: 30px;
+`;
+const ListLoader = styled.div`
+  border: 4px solid #3182CE;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 `;
 
-// Dummy Data
-const stats = [
-  { title: "Credits Left", value: "$0.360", icon: <MdOutlineMonetizationOn size={30} /> },
-  { title: "Credits Used", value: "$0.040", icon: <FaRegCreditCard size={30} /> },
-  { title: "Responses", value: "1", icon: <FaCheckCircle size={30} /> },
-  { title: "Follow-Ups", value: "0", icon: <FaReply size={30} /> },
-  { title: "Responded", value: "1", icon: <FaCheckCircle size={30} /> },
-  { title: "Appointments", value: "0", icon: <FaCalendarCheck size={30} /> },
-];
+const StatsWrapper = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  column-gap: 20px;
+  row-gap: 40px;
 
-const chartData = {
-  labels: ["02:24", "03:30", "04:45", "04:59", "05:30", "06:00", "06:24", "06:30", "07:45", "08:24", "09:00"],
-  datasets: [
-    {
-      label: "AI Automation HQ",
-      data: [1.0, 0.1, 0.2, 0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.3],
-      backgroundColor: (ctx) => {
-        const maxIndex = ctx.dataset.data.indexOf(Math.max(...ctx.dataset.data));
-        return ctx.dataIndex === maxIndex ? "#e63946" : "#333";
-      },
-    },
-  ],
-};
-
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+`;
 
 const DashboardComponents = () => {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["cardData"],
+    queryFn: getDashboaedData,
+  });
+
+  const stats = data
+    ? [
+        {
+          title: "Credits Left",
+          value: `$${data.credit_left.toFixed(3)}`,
+          icon: TCL
+        },
+        {
+          title: "Credits Used",
+          value: `$${data.credits_used.toFixed(3)}`,
+          icon: CU
+        },
+        {
+          title: "Responses",
+          value: data.total_ai_responses,
+          icon: Responses
+        },
+        // {
+        //   title: "Follow-Ups",
+        //   value: data.total_followups,
+        //   icon: <FaReply size={30} />,
+        // },
+        {
+          title: "Responded",
+          value: data.total_ai_responses,
+          icon: Respond
+        },
+        {
+          title: "Appointments",
+          value: data.total_appointments,
+          icon: Appointments
+        },
+        {
+          title: "Total Chats",
+          value: data.total_chats,
+          icon: Chat
+        },
+      ]
+    : [];
+
   return (
     <DashboardContainer>
-    {/* Chart Section */}
-    <ChartSection data={chartData} />
-
       {/* Stats Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", margin: "20px 0" }}>
-        {stats.map((stat, index) => (
-          <StatCard key={index} title={stat.title} value={stat.value} icon={stat.icon} />
-        ))}
-      </div>
+      {isLoading && <ListLoader />}
+      {isError && <p>Error Loading Stats.</p>}
+      {!isLoading && !isError && (
+        <StatsWrapper>
+          {stats.map((stat, index) => (
+            <StatCard
+              key={index}
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+            />
+          ))}
+        </StatsWrapper>
+      )}
 
-      <MessageTable />
-
+      {/* Chart Section */}
+      <EngagementChart />
     </DashboardContainer>
   );
 };

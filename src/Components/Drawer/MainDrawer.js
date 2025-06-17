@@ -1,291 +1,322 @@
 import * as React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
-import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Outlet } from "react-router-dom";
-import Tooltip from "@mui/material/Tooltip";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import BuildIcon from "@mui/icons-material/Build";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import { Logout } from "@mui/icons-material";
 import styled from "styled-components";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import { toast } from "react-toastify";
-import Avatar from "@mui/material/Avatar";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { useQueryClient } from "@tanstack/react-query";
 import logo from "../../assets/images/Logo.png";
+import bgImage from "../../assets/body/Background.png";
+import HomeIcon from "../../assets/sidebarIcons/home.png";
+import HomeIconA from "../../assets/sidebarIcons/homeA.png";
+import ChartIcon from "../../assets/sidebarIcons/chart.png";
+import ChartIconA from "../../assets/sidebarIcons/chartA.png";
+import BillingIcon from "../../assets/sidebarIcons/billing.png";
+import UsersIcon from "../../assets/sidebarIcons/users.png";
+import BillingIconA from "../../assets/sidebarIcons/billingA.png";
+import UsersIconA from "../../assets/sidebarIcons/usersA.png";
+import SettingIcon from "../../assets/topbarIcons/setting.png";
+import BellIcon from "../../assets/topbarIcons/bell.png";
+import BotConversations from "../../assets/sidebarIcons/botConversations.png";
+import BotConversationsA from "../../assets/sidebarIcons/botConversationsA.png";
+import CreateUpdate from "../../assets/sidebarIcons/createUpdate.png";
+import CreateUpdateA from "../../assets/sidebarIcons/CreateUpdateA.png";
+import TestBot from "../../assets/sidebarIcons/test.png";
+import TestBotA from "../../assets/sidebarIcons/TestA.png";
+import IntegrationIcon from "../../assets/sidebarIcons/integrations.png";
+import IntegrationIconA from "../../assets/sidebarIcons/IntegrationsA.png";
 
-const topbarColor = "#1976d2";
-const inactiveColor = "#000";
-const drawerWidth = 290;
+const drawerWidth = 265;
 
 const getTitleFromPath = (path) => {
   switch (path) {
     case "/dashboard":
       return "Dashboard";
+    case "/bot-conversations":
+      return "Bot Conversations";
     case "/create/modify-bot":
-      return "Create/Modify Bot";
-    case "/create/modify-bot/integrate":
-      return "Integrate";
-    case "/create/modify-bot/prompt":
-      return "Prompt";
+      return "Create Bot / Modify";
+    case "/integrations":
+      return "Integrations (GHL)";
+    case "/test-bot":
+      return "Test your Bot";
+    case "/billing":
+      return "Billing & Invoices";
+    case "/users":
+      return "Users";
     default:
       return "Page";
   }
 };
 
 function MainDrawer() {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [modifyBotOpen, setModifyBotOpen] = React.useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
-
-  const userName = localStorage.getItem("userName") || "User";
-  const userInitial = userName.charAt(0).toUpperCase();
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleAvatarClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    queryClient.clear();
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userName"); // Optional
-    navigate("/");
-    toast.success("User Logout Successfully!");
-  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleModifyBotToggle = () => {
-    setModifyBotOpen(!modifyBotOpen);
-  };
-
   const drawer = (
-    <div>
-      <Toolbar>
-        <LogoContainer>
-          <img src={logo} alt="logo" />
-        </LogoContainer>
-      </Toolbar>
-      <Divider />
+    <StyledDrawerContainer>
+      <LogoContainer>
+        <img src={logo} alt="SellWithBot" />
+      </LogoContainer>
+      <LogoDivider />
       <List>
-        {/* Dashboard Link */}
-        <ListItem key="dashboard" disablePadding>
-          <ListItemButton
-            component={Link}
-            to="/dashboard"
-            sx={{
-              color: currentPath === "/dashboard" ? topbarColor : inactiveColor,
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                color:
-                  currentPath === "/dashboard" ? topbarColor : inactiveColor,
-              }}
-            >
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
+        <ListItem disablePadding>
+          {currentPath === "/dashboard" ? (
+            <ActiveItem component={Link} to="/dashboard">
+              <ActiveItemIcon>
+                <img src={HomeIconA} alt="Icon" />
+              </ActiveItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ActiveItem>
+          ) : (
+            <InactiveItem component={Link} to="/dashboard">
+              <InactiveItemIcon>
+                <img src={HomeIcon} alt="Icon" />
+              </InactiveItemIcon>
+              <ListItemText primary="Dashboard" />
+            </InactiveItem>
+          )}
         </ListItem>
-
-        {/* Modify Bot Dropdown */}
 
         <ListItem disablePadding>
-          <ListItemButton
-            onClick={handleModifyBotToggle}
-            sx={{ color: inactiveColor }}
-          >
-            <ListItemIcon sx={{ color: inactiveColor }}>
-              <BuildIcon />
-            </ListItemIcon>
-            <ListItemText primary="Create / Modify Bot" />
-            {modifyBotOpen ? <ExpandLess /> : <ExpandMore />}
-          </ListItemButton>
+          {currentPath === "/bot-conversations" ? (
+            <ActiveItem component={Link} to="/bot-conversations">
+              <ActiveItemIcon>
+                <img src={BotConversationsA} alt="Icon" />
+              </ActiveItemIcon>
+              <ListItemText primary="Bot Conversations" />
+            </ActiveItem>
+          ) : (
+            <InactiveItem component={Link} to="/bot-conversations">
+              <InactiveItemIcon>
+                <img src={BotConversations} alt="Icon" />
+              </InactiveItemIcon>
+              <ListItemText primary="Bot Conversations" />
+            </InactiveItem>
+          )}
         </ListItem>
-        {/* Sublinks for Modify Bot */}
-        {modifyBotOpen && (
-          <List component="div" disablePadding sx={{ pl: 4 }}>
-            <ListItemButton
-              component={Link}
-              to="/create/modify-bot/integrate"
-              sx={{
-                color:
-                  currentPath === "/create/modify-bot/integrate"
-                    ? topbarColor
-                    : inactiveColor,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  color:
-                    currentPath === "/create/modify-bot/integrate"
-                      ? topbarColor
-                      : inactiveColor,
-                }}
-              >
-                <AssignmentTurnedInIcon />
-              </ListItemIcon>
-              <ListItemText primary="Integrate" />
-            </ListItemButton>
 
-            <ListItemButton
-              component={Link}
-              to="/create/modify-bot/prompt"
-              sx={{
-                color:
-                  currentPath === "/create/modify-bot/prompt"
-                    ? topbarColor
-                    : inactiveColor,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  color:
-                    currentPath === "/create/modify-bot/prompt"
-                      ? topbarColor
-                      : inactiveColor,
-                }}
-              >
-                <ChatBubbleOutlineIcon />
-              </ListItemIcon>
-              <ListItemText primary="Prompt" />
-            </ListItemButton>
-          </List>
-        )}
+        <ListItem disablePadding>
+          {currentPath === "/create/modify-bot" ? (
+            <ActiveItem component={Link} to="/create/modify-bot">
+              <ActiveItemIcon>
+                <img src={CreateUpdateA} alt="Icon" />
+              </ActiveItemIcon>
+              <ListItemText primary="Create Bot / Modify" />
+            </ActiveItem>
+          ) : (
+            <InactiveItem component={Link} to="/create/modify-bot">
+              <InactiveItemIcon>
+                <img src={CreateUpdate} alt="Icon" />
+              </InactiveItemIcon>
+              <ListItemText primary="Create Bot / Modify" />
+            </InactiveItem>
+          )}
+        </ListItem>
+
+        <ListItem disablePadding>
+          {currentPath === "/test-bot" ? (
+            <ActiveItem component={Link} to="/test-bot">
+              <ActiveItemIcon>
+                <img src={TestBotA} alt="Icon" />
+              </ActiveItemIcon>
+              <ListItemText primary="Test Your Bot" />
+            </ActiveItem>
+          ) : (
+            <InactiveItem component={Link} to="/test-bot">
+              <InactiveItemIcon>
+                <img src={TestBot} alt="Icon" />
+              </InactiveItemIcon>
+              <ListItemText primary="Test Your Bot" />
+            </InactiveItem>
+          )}
+        </ListItem>
+
+        <ListItem disablePadding>
+          {currentPath === "/integrations" ? (
+            <ActiveItem component={Link} to="/integrations">
+              <ActiveItemIcon>
+                <img src={IntegrationIconA} alt="Icon" />
+              </ActiveItemIcon>
+              <ListItemText primary="Integrations (GHL)" />
+            </ActiveItem>
+          ) : (
+            <InactiveItem component={Link} to="/integrations">
+              <InactiveItemIcon>
+                <img src={IntegrationIcon} alt="Icon" />
+              </InactiveItemIcon>
+              <ListItemText primary="Integrations (GHL)" />
+            </InactiveItem>
+          )}
+        </ListItem>
+
+        <ListItem disablePadding>
+          {currentPath === "/billing" ? (
+            <ActiveItem component={Link} to="/billing">
+              <ActiveItemIcon>
+                <img src={BillingIconA} alt="Icon" />
+              </ActiveItemIcon>
+              <ListItemText primary="Billing & Invoices" />
+            </ActiveItem>
+          ) : (
+            <InactiveItem component={Link} to="/billing">
+              <InactiveItemIcon>
+                <img src={BillingIcon} alt="Icon" />
+              </InactiveItemIcon>
+              <ListItemText primary="Billing & Invoices" />
+            </InactiveItem>
+          )}
+        </ListItem>
+
+        <ListItem disablePadding>
+          {currentPath === "/users" ? (
+            <ActiveItem component={Link} to="/users">
+              <ActiveItemIcon>
+                <img src={UsersIconA} alt="Icon" />
+              </ActiveItemIcon>
+              <ListItemText primary="Users" />
+            </ActiveItem>
+          ) : (
+            <InactiveItem component={Link} to="/users">
+              <InactiveItemIcon>
+                <img src={UsersIcon} alt="Icon" />
+              </InactiveItemIcon>
+              <ListItemText primary="Users" />
+            </InactiveItem>
+          )}
+        </ListItem>
       </List>
-    </div>
+    </StyledDrawerContainer>
   );
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
+    <MainWrapper>
       <AppBar
-        position="fixed"
+        position="absolute"
+        elevation={0}
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          backgroundColor: topbarColor,
+          width: `calc(100% - ${drawerWidth}px - 20px)`,
+          ml: `${drawerWidth}px`,
+          "@media (max-width: 990px)": {
+            width: "100%",
+            ml: 0,
+            mt: 0,
+          },
+          background: "none",
+          boxShadow: "none",
+          mt: 3,
+          borderRadius: "12px",
         }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: "none" } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            {getTitleFromPath(location.pathname)}
-          </Typography>
-          <Box sx={{ flexGrow: 0, ml: "auto" }}>
-            <Tooltip title="Account settings">
-              <IconButton onClick={handleAvatarClick} sx={{ p: 0 }}>
-                <Avatar sx={{ bgcolor: "#fff", color: topbarColor }}>
-                  {userInitial}
-                </Avatar>
-              </IconButton>
-            </Tooltip>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleMenuClose}
-              onClick={handleMenuClose}
-              PaperProps={{
-                elevation: 4,
-                sx: {
-                  mt: 1.5,
-                  overflow: "visible",
-                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                  "& .MuiAvatar-root": {
-                    width: 32,
-                    height: 32,
-                    ml: -0.5,
-                    mr: 1,
-                  },
+        <Toolbar
+          sx={{ display: "flex", justifyContent: "space-between", p: 0, m: 0 }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{
+                mr: 1,
+                ml: 1,
+                "@media (min-width: 990px)": {
+                  display: "none",
                 },
               }}
-              transformOrigin={{ horizontal: "right", vertical: "top" }}
-              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             >
-              <MenuItem disabled>
-                <Typography variant="body1">{userName}</Typography>
-              </MenuItem>
-              <Divider />
-              <MenuItem onClick={handleLogout}>
-                <ListItemIcon>
-                  <Logout fontSize="small" />
-                </ListItemIcon>
-                Logout
-              </MenuItem>
-            </Menu>
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                fontSize: "14px",
+                color: "#FFFFFF",
+                fontFamily: "Mulish",
+              }}
+            >
+              {getTitleFromPath(location.pathname)}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 2, pr: 2 }}>
+            <img src={SettingIcon} alt="Icon" />
+            <img src={BellIcon} alt="Icon" />
           </Box>
         </Toolbar>
       </AppBar>
+
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{
+          width: { sm: drawerWidth },
+          flexShrink: { sm: 0 },
+        }}
         aria-label="mailbox folders"
       >
-        {/* Mobile Drawer */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile
+            keepMounted: true,
           }}
           sx={{
-            display: { xs: "block", sm: "none" },
+            display: "block",
+            "@media (min-width: 990px)": {
+              display: "none",
+            },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
+              borderRadius: "20px",
+              boxShadow: "0px 5px 14px 0px #0000000D",
+              position: "fixed",
+              top: 20,
+              left: 20,
+              bottom: 20,
+              height: "auto",
+              backgroundColor:
+                "linear-gradient(90deg, rgba(224, 225, 226, 0) 0%, #E0E1E2 49.52%, rgba(224, 225, 226, 0.15625) 99.04%)",
             },
           }}
         >
           {drawer}
         </Drawer>
 
-        {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: "none", sm: "block" },
+            display: "none",
+            "@media (min-width: 990px)": {
+              display: "block",
+            },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
+              borderRadius: "20px",
+              boxShadow: "0px 5px 14px 0px #0000000D",
+              position: "fixed",
+              top: 20,
+              left: 20,
+              bottom: 20,
+              height: "auto",
+              backgroundColor:
+                "linear-gradient(90deg, rgba(224, 225, 226, 0) 0%, #E0E1E2 49.52%, rgba(224, 225, 226, 0.15625) 99.04%)",
             },
           }}
           open
@@ -293,11 +324,11 @@ function MainDrawer() {
           {drawer}
         </Drawer>
       </Box>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
         <Toolbar />
         <Outlet />
       </Box>
-    </Box>
+    </MainWrapper>
   );
 }
 
@@ -306,14 +337,96 @@ export default MainDrawer;
 const LogoContainer = styled.div`
   display: flex;
   justify-content: center;
-  width: 100%;
+  align-items: center;
+`;
 
-  h1 {
-    font-size: 24px;
-    font-weight: bold;
-    color: #007bff;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
+const LogoDivider = styled.div`
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(224, 225, 226, 0) 0%,
+    #e0e1e2 49.52%,
+    rgba(224, 225, 226, 0.15625) 99.04%
+  );
+  height: 1px;
+`;
+
+const StyledDrawerContainer = styled.div`
+  height: 100%;
+  background: #ffffff;
+  overflow: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+const ActiveItem = styled(ListItemButton)`
+  background: #ffffff;
+  box-shadow: 0px 5px 14px 0px #0000000d;
+  border: 1px solid
+    linear-gradient(
+      90deg,
+      rgba(224, 225, 226, 0) 0%,
+      #e0e1e2 49.52%,
+      rgba(224, 225, 226, 0.15625) 99.04%
+    );
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .css-rizt0-MuiTypography-root {
+    color: #2d3748;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Mulish";
+  }
+`;
+
+const InactiveItem = styled(ListItemButton)`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .css-rizt0-MuiTypography-root {
+    color: #a0aec0;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Mulish";
+  }
+`;
+
+const ActiveItemIcon = styled.div`
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #3182ce;
+  border-radius: 8px;
+`;
+
+const InactiveItemIcon = styled.div`
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  color: #3182ce;
+  font-size: 16px;
+`;
+
+const MainWrapper = styled.div`
+  display: flex;
+  background-image: url(${bgImage});
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 100% 414px; /* Full width, fixed height */
+  background-attachment: fixed;
+  min-height: 414px;
+
+  @media (max-width: 990px) {
+    flex-direction: column;
   }
 `;

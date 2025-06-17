@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { FaToggleOff, FaToggleOn } from "react-icons/fa";
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { updateBot } from "../../apis/WebHook/updateBot";
 import { getBotDetails } from "../../apis/WebHook/getBotDetailPrompt";
 import { toast } from "react-toastify";
@@ -10,10 +10,9 @@ import { toast } from "react-toastify";
 const Container = styled.div`
   width: 100%;
   background: #ffffff;
-  padding: 20px;
-  margin: 10px 0 30px 0;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 30px 50px;
+  border-radius: 30px;
+  box-shadow: 0px 10px 60px 0px #E2ECF980;
 `;
 
 const ToggleContainer = styled.div`
@@ -26,7 +25,7 @@ const ToggleContainer = styled.div`
 
 const ToggleLabel = styled.span`
   font-size: 14px;
-  color: #4b5563;
+  color: #3182CE;
   margin-right: 8px;
 `;
 
@@ -36,7 +35,7 @@ const Section = styled.div`
 `;
 
 const Title = styled.h3`
-  color: #2563eb;
+  color: #3182CE;
   font-size: 15px;
   font-weight: 600;
   margin: 5px 0;
@@ -45,7 +44,7 @@ const Title = styled.h3`
 const TextArea = styled.textarea`
   width: 100%;
   min-height: 120px;
-  color: #4b5563;
+  color: #3182CE;
   font-size: 14px;
   line-height: 1.5;
   background: #fff;
@@ -74,11 +73,11 @@ const InputField = styled.input`
   border-radius: 5px;
   font-size: 14px;
   outline: none;
-  color: #4b5563;
+  color: #3182CE;
 `;
 
 const SaveButton = styled.button`
-  background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
+  background: ${(props) => (props.disabled ? "#ccc" : "#3182CE")};
   color: white;
   padding: 10px;
   border: none;
@@ -89,7 +88,7 @@ const SaveButton = styled.button`
   margin-top: 10px;
 
   &:hover {
-    background: ${(props) => (props.disabled ? "#ccc" : "#0056b3")};
+    background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
   }
 `;
 
@@ -103,13 +102,17 @@ const Loader = styled.div`
   display: inline-block;
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;
 
 const ListLoader = styled.div`
-  border: 4px solid #0056b3;
+  border: 4px solid #3182CE;
   border-radius: 50%;
   border-top: 4px solid #fff;
   width: 30px;
@@ -118,8 +121,71 @@ const ListLoader = styled.div`
   display: inline-block;
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const RangeInput = styled.input.attrs({ type: "range" })`
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  outline: none;
+  margin: 5px 0 15px 0;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3182CE;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    transition: background 0.3s ease;
+  }
+
+  &::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #3182CE;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    transition: background 0.3s ease;
+  }
+
+  &:hover {
+    background: #d1d5db;
+  }
+
+  &:focus::-webkit-slider-thumb {
+    background: #1d4ed8;
+  }
+`;
+
+const RangeHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #3182CE;
+  font-size: 14px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+
+  span {
+    font-size: 14px;
+    color: #9ca3af;
+    margin-left: 5px;
   }
 `;
 
@@ -130,8 +196,10 @@ const MainCard = () => {
   const [businessInfo, setBusinessInfo] = useState("");
   const [responseText, setResponseText] = useState("");
   const [generalPrompt, setGeneralPrompt] = useState("");
-  const [temperature, setTemperature] = useState(0.7);
-  const [maxTokens, setMaxTokens] = useState(500);
+  const [temperature, setTemperature] = useState(0.5);
+  const [maxTokens, setMaxTokens] = useState(100);
+  const [role, setRole] = useState("");
+  const [goal, setGoal] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["botDetails", improvedLayout],
@@ -139,8 +207,8 @@ const MainCard = () => {
     enabled: true,
     refetchOnWindowFocus: false,
     retry: false,
-  });  
-  
+  });
+
   useEffect(() => {
     if (data?.bot_data?.bot) {
       const bot = data.bot_data.bot;
@@ -149,18 +217,20 @@ const MainCard = () => {
       setBusinessInfo(bot.business_rules || "");
       setResponseText(bot.response_text || "");
       setGeneralPrompt(bot.role_prompt || "");
-      setTemperature(bot.temperature ?? 0.7);
-      setMaxTokens(bot.max_token ?? 500);
+      setTemperature(bot.temperature || bot.improved_temperature || 0.5);
+      setMaxTokens(bot.max_token || bot.improved_max_token || 100);
       setImprovedLayout(bot.improved_layout ?? false);
+      setRole(bot.role || "");
+      setGoal(bot.goal || "");
     }
   }, [data]);
 
   const mutation = useMutation({
     mutationFn: updateBot,
     onSuccess: () => {
-      toast.success('Bot updated successfully!');
+      toast.success("Bot updated successfully!");
     },
-    onError: () => toast.error('Failed to Update Bot!'),
+    onError: () => toast.error("Failed to Update Bot!"),
   });
 
   const handleSave = () => {
@@ -173,10 +243,17 @@ const MainCard = () => {
       maxTokens,
       improvedLayout,
       generalPrompt,
+      role,
+      goal,
     });
   };
 
-  if (isLoading) return <Container><ListLoader /></Container>;
+  if (isLoading)
+    return (
+      <Container>
+        <ListLoader />
+      </Container>
+    );
 
   return (
     <Container>
@@ -185,54 +262,76 @@ const MainCard = () => {
         {improvedLayout ? (
           <FaToggleOn
             size={24}
-            color="#2563eb"
+            color="#3182CE"
             onClick={() => setImprovedLayout(false)}
           />
         ) : (
           <FaToggleOff
             size={24}
             color="#6b7280"
-            onClick={() => setImprovedLayout(true)} />
+            onClick={() => setImprovedLayout(true)}
+          />
         )}
       </ToggleContainer>
 
       {improvedLayout ? (
-        
         <>
           <Section>
             <Title>Bot Name</Title>
             <InputField
               value={botName}
               onChange={(e) => setBotName(e.target.value)}
-              placeholder="Enter Bot Name"
+              placeholder="Please type Your Bot Name Here"
             />
-            <Title>Why We’re Having This Talk</Title>
+            <Title>Role</Title>
+            <InputField
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="Please type Your Bot Role Here"
+            />
+
+            <Title>Goal</Title>
+            <TextArea
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              placeholder="Please type Your Bot Goal Here"
+            />
+            <CharacterCount>
+              {goal.length} / {maxTokens} CHARACTERS
+            </CharacterCount>
+            <Title>Conversation Flow</Title>
             <TextArea
               value={whyText}
               onChange={(e) => setWhyText(e.target.value)}
-              placeholder="Please Enter Why We’re Having This Talk"
+              placeholder="Please type Your Bot Conversation Flow Here"
             />
-            <CharacterCount>{whyText.length} / {maxTokens} CHARACTERS</CharacterCount>
+            <CharacterCount>
+              {whyText.length} / {maxTokens} CHARACTERS
+            </CharacterCount>
           </Section>
 
           <Section>
-            <Title>Important Business Information</Title>
+            <Title>Rules</Title>
             <TextArea
               value={businessInfo}
               onChange={(e) => setBusinessInfo(e.target.value)}
-              placeholder="Please Enter Important Business Information"
+              placeholder="Please type Your Bot Rules Here"
             />
-            <CharacterCount>{businessInfo.length} / {maxTokens} CHARACTERS</CharacterCount>
+            <CharacterCount>
+              {businessInfo.length} / {maxTokens} CHARACTERS
+            </CharacterCount>
           </Section>
 
           <Section>
-            <Title>How to Respond</Title>
+            <Title>Frequently Ask Question</Title>
             <TextArea
               value={responseText}
               onChange={(e) => setResponseText(e.target.value)}
-              placeholder="Please Enter How to Respond"
+              placeholder="Please type Your Bot FAQs Here"
             />
-            <CharacterCount>{responseText.length} / {maxTokens} CHARACTERS</CharacterCount>
+            <CharacterCount>
+              {responseText.length} / {maxTokens} CHARACTERS
+            </CharacterCount>
           </Section>
         </>
       ) : (
@@ -241,33 +340,52 @@ const MainCard = () => {
           <InputField
             value={botName}
             onChange={(e) => setBotName(e.target.value)}
-            placeholder="Enter Bot Name"
+            placeholder="Please type Your Bot Name Here"
           />
           <Title>General Prompt</Title>
           <TextArea
             value={generalPrompt}
             onChange={(e) => setGeneralPrompt(e.target.value)}
-            placeholder="Please Enter General Prompt"
+            placeholder="Please type Your Bot General Prompt Here"
           />
-          <CharacterCount>{generalPrompt.length} / {maxTokens} CHARACTERS</CharacterCount>
+          <CharacterCount>
+            {generalPrompt.length} / {maxTokens} CHARACTERS
+          </CharacterCount>
         </Section>
       )}
 
-      <Title>Temperature</Title>
-      <InputField
-        type="number"
-        step="0.1"
+      <RangeHeader>
+        <Title>
+          Temperature
+          <span>
+            (0.0 = focused | 0.3 = balanced | 0.7 = creative | 1.0 = freestyle
+            mode)
+          </span>
+        </Title>
+        <Title>{temperature.toFixed(1)}</Title>
+      </RangeHeader>
+      <RangeInput
         min="0"
         max="1"
+        step="0.1"
         value={temperature}
         onChange={(e) => setTemperature(parseFloat(e.target.value))}
       />
 
-      <Title>Max Tokens</Title>
-      <InputField
-        type="number"
+      <RangeHeader>
+        <Title>
+          Max Tokens
+          <span>
+            (1 token ≈ 4 characters)
+          </span>
+        </Title>
+        <Title>{maxTokens}</Title>
+      </RangeHeader>
+      <RangeInput
+        type="range"
         min="1"
-        max="500"
+        max="200"
+        step="1"
         value={maxTokens}
         onChange={(e) => setMaxTokens(parseInt(e.target.value))}
       />

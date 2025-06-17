@@ -13,7 +13,6 @@ const Container = styled.div`
 const MainSection = () => {
   return (
     <Container>
-      {/* <BotVoice /> */}
       <MainCard />
     </Container>
   )

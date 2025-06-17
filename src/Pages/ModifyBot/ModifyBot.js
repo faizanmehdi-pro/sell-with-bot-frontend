@@ -13,24 +13,24 @@ const Tabs = styled.div`
   display: flex;
   justify-content: flex-start;
   gap: 20px;
-  border-bottom: 2px solid #007bff;
+  border-bottom: 2px solid #3182CE;
   padding: 10px;
   border-radius: 8px;
 `;
 
 const TabsDivider = styled.div`
   width: 2px;
-  background: #007bff;
+  background: #3182CE;
 `;
 
 const Tab = styled.div`
   font-size: 18px;
   font-weight: bold;
-  color: ${(props) => (props.active ? "#007bff" : "#333")};
+  color: ${(props) => (props.active ? "#3182CE" : "#333")};
   cursor: pointer;
 
   &:hover {
-    color: #007bff;
+    color: #3182CE;
   }
 `;
 

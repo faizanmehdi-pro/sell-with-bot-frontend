@@ -5,36 +5,72 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatTableHistory } from "../../apis/chatTableHistory";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { LuSearch } from "react-icons/lu";
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 50px;
+  padding: 30px;
+`;
+
+const SearchWrapper = styled.div`
+  height: 63px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #ffffff;
+  border: 1px solid #d6d6d6;
+  border-radius: 5px;
+  padding: 0 20px;
+  gap: 8px;
 `;
 
 const SearchBar = styled.input`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
+  padding: 5px;
+  border: none;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 500;
+  font-family: "Poppins";
   outline: none;
+
+  ::placeholder {
+    color: #969ba0;
+  }
 `;
 
 const TableContainer = styled.div`
   overflow-x: auto;
+  box-shadow: 0px 10px 60px 0px #E2ECF980;
+  background: #FFFFFF;
+  padding: 30px;
+  border-radius: 30px;
 `;
 
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #ddd;
 `;
 
 const TableHead = styled.thead`
-  background-color: #007bff;
-  color: white;
+  background-color: #3182ce;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 500;
+  font-family: "Poppins", sans-serif;
+  margin-bottom: 30px;
+
+  th:first-child {
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+  }
+
+  th:last-child {
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+  }
 `;
 
 const TableRow = styled.tr`
@@ -46,7 +82,11 @@ const TableRow = styled.tr`
 const TableHeader = styled.th`
   padding: 12px;
   text-align: left;
-  border: 1px solid #ddd;
+  border: 1px solid #FFFFFF;
+  font-size: 20px;
+  font-weight: 500;
+  font-family: "Poppins", sans-serif;
+  margin-bottom: 30px;
 `;
 
 const TableCell = styled.td`
@@ -61,7 +101,7 @@ const ToggleWrapper = styled.div`
   width: 60px;
   height: 30px;
   border-radius: 34px;
-  background-color: ${(props) => (props.active ? "#007bff" : "#dc3545")};
+  background-color: ${(props) => (props.active ? "#3182CE" : "#dc3545")};
   cursor: pointer;
   transition: background-color 0.3s;
   display: flex;
@@ -99,7 +139,7 @@ const ToggleThumb = styled.div`
   background: white;
   transition: left 0.3s;
   z-index: 1;
-`; 
+`;
 
 const Spinner = styled(FaSpinner)`
   color: white;
@@ -117,7 +157,7 @@ const Spinner = styled(FaSpinner)`
 `;
 
 const ListLoader = styled.div`
-  border: 4px solid #0056b3;
+  border: 4px solid #3182CE;
   border-radius: 50%;
   border-top: 4px solid #fff;
   width: 30px;
@@ -184,7 +224,7 @@ const MessageTable = () => {
     queryFn: chatTableHistory,
   });
 
-  // if (isLoading) return <Container><ListLoader /></Container>; 
+  // if (isLoading) return <Container><ListLoader /></Container>;
 
   const filteredData = Array.isArray(data)
     ? data.filter((item) =>
@@ -206,12 +246,15 @@ const MessageTable = () => {
 
   return (
     <Container>
-      <SearchBar
-        type="text"
-        placeholder="Search Message by Contact ID..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <SearchWrapper>
+        <LuSearch size={24} color="#969BA0" />
+        <SearchBar
+          type="text"
+          placeholder="Search Message by Contact ID..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </SearchWrapper>
       <TableContainer>
         <StyledTable>
           <TableHead>
@@ -233,9 +276,7 @@ const MessageTable = () => {
               </TableRow>
             ) : filteredData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan="6">
-                  No Results Found
-                </TableCell>
+                <TableCell colSpan="6">No Results Found</TableCell>
               </TableRow>
             ) : (
               filteredData.map((msg, index) => (

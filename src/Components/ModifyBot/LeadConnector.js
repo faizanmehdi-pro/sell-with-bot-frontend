@@ -13,11 +13,10 @@ import { activeAccounts } from "../../apis/activeAccounts";
 
 const CardContainer = styled.div`
   width: 100%;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 30px 20px;
-  margin-top: 40px;
+  background: #FFFFFF;
+  padding: 100px 30px 50px 30px;
+  box-shadow: 0px 10px 60px 0px #E2ECF980;
+  border-radius: 30px;
 `;
 
 const Header = styled.div`
@@ -51,7 +50,7 @@ const Title = styled.h3`
 
 const Subtitle = styled.a`
   font-size: 14px;
-  color: #007bff;
+  color: #3182CE;
   text-decoration: none;
 
   &:hover {
@@ -102,7 +101,7 @@ const SearchIcon = styled(FiSearch)`
 //   color: #999;
 
 //   &:hover {
-//     color: #007bff;
+//     color: #3182CE;
 //   }
 // `;
 
@@ -143,7 +142,7 @@ const IconActions = styled.div`
     color: #999;
 
     &:hover {
-      color: #007bff;
+      color: #3182CE;
     }
   }
 `;
@@ -176,7 +175,7 @@ const ListItemSubtitle = styled.div`
 `;
 
 const AddButton = styled(Link)`
-  background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
+  background: ${(props) => (props.disabled ? "#ccc" : "#3182CE")};
   color: #ffffff;
   border: none;
   border-radius: 5px;
@@ -190,7 +189,7 @@ const AddButton = styled(Link)`
   align-items: center;
 
   &:hover {
-    background: ${(props) => (props.disabled ? "#ccc" : "#0056b3")};
+    background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
   }
 `;
 
@@ -216,7 +215,7 @@ const LoaderContainer = styled.div`
 `;
 
 const ListLoader = styled.div`
-  border: 4px solid #0056b3;
+  border: 4px solid #3182CE;
   border-radius: 50%;
   border-top: 4px solid #fff;
   width: 30px;

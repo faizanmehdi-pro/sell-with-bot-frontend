@@ -9,8 +9,6 @@ const api = axios.create({
 export const leadConnectIntegrate = async () => {
   const userID = localStorage.getItem("user-ID");
 
-  const response = await api.get(
-    `oauth/initiate/?user_id=${userID}`
-  );
+  const response = await api.get(`oauth/initiate/?user_id=${userID}`);
   return response.data;
 };

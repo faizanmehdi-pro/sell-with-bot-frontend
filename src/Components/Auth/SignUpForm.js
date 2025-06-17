@@ -46,7 +46,7 @@ const SignupBox = styled.div`
 // const Heading = styled.h1`
 //   font-size: 32px;
 //   font-weight: bold;
-//   color: #007bff;
+//   color: #3182CE;
 //   text-transform: uppercase;
 //   letter-spacing: 2px;
 //   text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
@@ -135,7 +135,7 @@ const EyeButton = styled.button`
   color: #777;
 
   &:hover {
-    color: #007bff;
+    color: #3182CE;
   }
 `;
 
@@ -152,7 +152,7 @@ const CheckboxContainer = styled.div`
   }
 
   a {
-    color: #007bff;
+    color: #3182CE;
     text-decoration: none;
     font-weight: bold;
 
@@ -165,7 +165,7 @@ const CheckboxContainer = styled.div`
 const Button = styled.button`
   width: 100%;
   padding: 12px;
-  background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
+  background: ${(props) => (props.disabled ? "#ccc" : "#3182CE")};
   color: white;
   border: none;
   border-radius: 8px;
@@ -175,7 +175,7 @@ const Button = styled.button`
   transition: background 0.3s;
 
   &:hover {
-    background: ${(props) => (props.disabled ? "#ccc" : "#0056b3")};
+    background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
   }
 `;
 
@@ -185,7 +185,7 @@ const LinkText = styled.p`
   margin-top: 10px;
 
   a {
-    color: #007bff;
+    color: #3182CE;
     text-decoration: none;
     font-weight: bold;
 

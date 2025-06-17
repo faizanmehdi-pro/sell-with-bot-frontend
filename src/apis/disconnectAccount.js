@@ -12,11 +12,14 @@ export const disconnectAccount = async (locationID) => {
 
   const API_KEY = `token ${userToken}`;
 
-  const response = await api.delete(`/oauth/disconnect_ghl_account/?location_id=${locationID}`, {
-    headers: {
-      Authorization: API_KEY,
-    },
-  });
+  const response = await api.delete(
+    `/oauth/disconnect_ghl_account/?location_id=${locationID}`,
+    {
+      headers: {
+        Authorization: API_KEY,
+      },
+    }
+  );
 
   return response.data;
 };

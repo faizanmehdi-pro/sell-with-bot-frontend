@@ -6,14 +6,14 @@ const api = axios.create({
 });
 
 export const signupUser = async (userData) => {
-    try {
-      const response = await api.post("api/signup/", userData);
-      return response.data;
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Signup failed";
-      throw new Error(message);
-    }
-  };
+  try {
+    const response = await api.post("api/signup/", userData);
+    return response.data;
+  } catch (error) {
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Signup failed";
+    throw new Error(message);
+  }
+};

@@ -12,11 +12,14 @@ export const getBotDetails = async (improvedLayout) => {
 
   const API_KEY = `token ${userToken}`;
 
-  const response = await api.get(`/api/UpdateBot/?improved_layout=${improvedLayout}`, {
-    headers: {
-      Authorization: API_KEY,
-    },
-  });
+  const response = await api.get(
+    `/api/UpdateBot/?improved_layout=${improvedLayout}`,
+    {
+      headers: {
+        Authorization: API_KEY,
+      },
+    }
+  );
 
   return response.data;
 };

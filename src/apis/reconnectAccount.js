@@ -6,7 +6,7 @@ const api = axios.create({
   baseURL,
 });
 
-export const reconnectAccount = async ({location_id }) => {
+export const reconnectAccount = async ({ location_id }) => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User token not found");
 
@@ -14,18 +14,21 @@ export const reconnectAccount = async ({location_id }) => {
 
   try {
     const response = await api.post(
-      "/oauth/reconnect_ghl/", 
-      { location_id : location_id  },
-      { 
+      "/oauth/reconnect_ghl/",
+      { location_id: location_id },
+      {
         headers: {
           Authorization: API_KEY,
-        }
+        },
       }
     );
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching GHL subaccounts:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching GHL subaccounts:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };

@@ -14,18 +14,21 @@ export const getGHLSubAccounts = async (payload) => {
 
   try {
     const response = await api.post(
-      "/oauth/ghl_account_list", 
-      { accounts: [payload] }, // Request body with the accounts array
-      { 
+      "/oauth/ghl_account_list",
+      { accounts: [payload] },
+      {
         headers: {
-          Authorization: API_KEY, // Authorization header properly placed here
-        }
+          Authorization: API_KEY,
+        },
       }
     );
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching GHL subaccounts:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching GHL subaccounts:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };

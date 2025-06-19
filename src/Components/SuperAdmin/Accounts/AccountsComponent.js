@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { FaRegEdit, FaRegTrashAlt, FaArrowRight, FaChevronDown, FaArrowDown } from 'react-icons/fa';
-import { FiCalendar } from 'react-icons/fi';
+import React, { useState } from "react";
+import styled from "styled-components";
+import {
+  FaRegEdit,
+  FaRegTrashAlt,
+  FaArrowRight,
+  FaChevronDown,
+  FaArrowDown,
+} from "react-icons/fa";
+import { FiCalendar } from "react-icons/fi";
 import { LuSearch } from "react-icons/lu";
 import { MdOutlineMarkChatUnread } from "react-icons/md";
 import { TbArrowsRightLeft } from "react-icons/tb";
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import bar from '../../../assets/SuperAdmin/accounts/bar.png'
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import bar from "../../../assets/SuperAdmin/accounts/bar.png";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getAdminUserAccountsList } from "../../../apis/SuperAdmin/getAdminUserAccountsList";
+import { toast } from "react-toastify";
+import { switchToAccount } from "../../../apis/SuperAdmin/switchToAccount";
 
 const Container = styled.div`
   display: flex;
@@ -34,18 +44,17 @@ const Header = styled.div`
 `;
 
 const DateFilter = styled.div`
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 10px;
   background: #ffffff;
   border-radius: 5px;
   width: 300px;
   height: 42px;
-  color: #969BA0;
-  font-family: 'Poppins', sans-serif;
+  color: #969ba0;
+  font-family: "Poppins", sans-serif;
 
-  
   .react-datepicker-wrapper {
     width: 84px;
   }
@@ -57,13 +66,12 @@ const DateFilter = styled.div`
     border-radius: 6px;
     font-size: 16px;
     outline: none;
-    color: #969BA0;
+    color: #969ba0;
     font-size: 13px;
     font-weight: 500;
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
   }
 
-  
   @media (max-width: 550px) {
     width: 100%;
   }
@@ -73,7 +81,7 @@ const SearchSortBar = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  
+
   @media (max-width: 550px) {
     width: 80%;
     flex-direction: column-reverse;
@@ -90,13 +98,13 @@ const SortSelects = styled.div`
 const SortSelect = styled.div`
   background: white;
   color: #212121;
-  border: 1px solid #D6D6D6;
+  border: 1px solid #d6d6d6;
   border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 13px;
   font-weight: 400;
   position: relative;
@@ -104,12 +112,11 @@ const SortSelect = styled.div`
   width: 112px;
   height: 42px;
   padding: 0 15px;
-  border-top-left-radius: ${(props) => (props.rounded ? '5px' : '0')};
-  border-bottom-left-radius: ${(props) => (props.rounded ? '5px' : '0')};
-  border-top-right-radius: ${(props) => (props.rounded ? '0' : '5px')};
-  border-bottom-right-radius: ${(props) => (props.rounded ? '0' : '5px')};
+  border-top-left-radius: ${(props) => (props.rounded ? "5px" : "0")};
+  border-bottom-left-radius: ${(props) => (props.rounded ? "5px" : "0")};
+  border-top-right-radius: ${(props) => (props.rounded ? "0" : "5px")};
+  border-bottom-right-radius: ${(props) => (props.rounded ? "0" : "5px")};
 `;
-
 
 const SearchWrapper = styled.div`
   width: 238px;
@@ -121,8 +128,8 @@ const SearchWrapper = styled.div`
   border-radius: 5px;
   padding: 0 20px;
   gap: 8px;
-  border: 1px solid #D6D6D6;
-  
+  border: 1px solid #d6d6d6;
+
   @media (max-width: 550px) {
     width: 100%;
   }
@@ -132,7 +139,7 @@ const StyledSearchInput = styled.input`
   border: none;
   outline: none;
   background: none;
-  color: #969BA0;
+  color: #969ba0;
   font-family: "Poppins", sans-serif;
   font-weight: 600;
   font-size: 13px;
@@ -142,9 +149,9 @@ const StyledSearchInput = styled.input`
     font-family: "Poppins", sans-serif;
     font-weight: 500;
     font-size: 13px;
-    color: #969BA0;
+    color: #969ba0;
   }
-  
+
   @media (max-width: 550px) {
     width: 90%;
   }
@@ -174,13 +181,13 @@ const DropdownItem = styled.div`
 `;
 
 const Main = styled.div`
-  background: #FFFFFF;
+  background: #ffffff;
   padding: 20px 30px;
-  box-shadow: 0px 4px 3px -2px #0000000F;
+  box-shadow: 0px 4px 3px -2px #0000000f;
   display: flex;
   flex-direction: column;
-  gap: 30px;  
-  
+  gap: 30px;
+
   @media (max-width: 550px) {
     gap: 20px;
     padding: 20px;
@@ -189,23 +196,23 @@ const Main = styled.div`
 
 const Title = styled.h2`
   font-size: 13px;
-  color: #3182CE;
+  color: #3182ce;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   margin: 0;
   position: relative;
   display: inline-block;
-  border-bottom: 1px solid #E6E7E9;
+  border-bottom: 1px solid #e6e7e9;
   padding: 0 0 10px 16px;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -1px;
     left: 0;
     height: 2px;
     width: 100px;
-    background-color: #3182CE;
+    background-color: #3182ce;
   }
 `;
 
@@ -213,25 +220,25 @@ const CardGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 30px;
-  
+
   @media (max-width: 1300px) {
     grid-template-columns: 1fr;
   }
-  
+
   @media (max-width: 550px) {
     grid-gap: 20px;
   }
 `;
 
 const Card = styled.div`
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 5px;
-  border: 1px solid #E6E7E9;
+  border: 1px solid #e6e7e9;
   display: flex;
   flex-direction: column;
   gap: 30px;
   position: relative;
-  
+
   @media (max-width: 550px) {
     gap: 20px;
   }
@@ -248,7 +255,7 @@ const CardTopLeft = styled.div`
   flex-direction: column;
   gap: 5px;
   margin-top: 5px;
-  
+
   @media (max-width: 420px) {
     margin-top: 0;
   }
@@ -258,11 +265,11 @@ const CardTopCenter = styled.div`
   display: flex;
   align-items: start;
   gap: 105px;
-  
+
   @media (max-width: 550px) {
     gap: 40px;
   }
-  
+
   @media (max-width: 420px) {
     flex-direction: column;
     gap: 20px;
@@ -277,7 +284,7 @@ const CardTopCenterInfo = styled.div`
 `;
 
 const CardTopCenterInfoHeading = styled.h3`
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 600;
   font-size: 14px;
   color: #212121;
@@ -293,7 +300,7 @@ const CardTopCenterInfoLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 500;
   font-size: 14px;
   color: #000000;
@@ -304,35 +311,34 @@ const CardTopCenterInfoRight = styled.div`
   justify-content: center;
   align-items: center;
   gap: 5px;
-  background: #CCE6FF;
+  background: #cce6ff;
   width: 68px;
   height: 23px;
   border-radius: 15px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 500;
   font-size: 11px;
-  color: #3182CE;
+  color: #3182ce;
 `;
 
 const Label = styled.div`
   color: #212121;
   font-size: 16px;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 `;
 
 const InfoLine = styled.div`
   font-size: 14px;
   font-weight: 600;
   color: #212121;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 
-  span{
+  span {
     font-size: 14px;
     font-weight: 400;
   }
 `;
-
 
 const IconGroup = styled.div`
   display: flex;
@@ -352,14 +358,14 @@ const IconGroup = styled.div`
 const CardBottom = styled.div`
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid #E6E7E9;
+  border-top: 1px solid #e6e7e9;
 `;
 
 const SwitchButton = styled.button`
   background: white;
-  font-family: 'Mulish', sans-serif;
-  color: #3182CE;
-  border: 1px solid #E6E7E9;
+  font-family: "Mulish", sans-serif;
+  color: #3182ce;
+  border: 1px solid #e6e7e9;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -372,20 +378,50 @@ const SwitchButton = styled.button`
   gap: 5px;
 `;
 
+const ListLoader = styled.div`
+  border: 4px solid #3182ce;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 const AccountComponent = () => {
-  const accounts = Array(6).fill({
-    clientName: 'Akshay Syal',
-    botId: '09898989898',
-    chats: 100,
-    tokenUsage: '31.03%',
-  });
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [showSortBy, setShowSortBy] = useState(false);
   const [showOrder, setShowOrder] = useState(false);
-  const [selectedSortBy, setSelectedSortBy] = useState('Sort By');
-  const [selectedOrder, setSelectedOrder] = useState('A - Z');
+  const [selectedSortBy, setSelectedSortBy] = useState("Sort By");
+  const [selectedOrder, setSelectedOrder] = useState("A - Z");
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: () => getAdminUserAccountsList(),
+    keepPreviousData: true,
+  });
+
+  const switchMutation = useMutation({
+    mutationFn: (userId) => switchToAccount(userId),
+    onSuccess: (resp) => {
+      toast.success("Switched account successfully");
+      window.open(resp?.url_data, "_self");
+    },
+    onError: () => {
+      toast.error("Failed to switch account");
+    },
+  });
 
   return (
     <Container>
@@ -404,54 +440,53 @@ const AccountComponent = () => {
             dateFormat="yyyy-MM-dd"
             popperPlacement="bottom-start"
           />
-          
+
           <FiCalendar />
-          
         </DateFilter>
 
         <SearchSortBar>
-                    <SearchWrapper>
-                      <LuSearch size={22} color="#7E7E7E" />
-                      <StyledSearchInput placeholder="Search by Accounts..." />
-                    </SearchWrapper>
+          <SearchWrapper>
+            <LuSearch size={22} color="#7E7E7E" />
+            <StyledSearchInput placeholder="Search by Accounts..." />
+          </SearchWrapper>
           <SortSelects>
-          <SortSelect rounded onClick={() => setShowSortBy(!showSortBy)}>
-            {selectedSortBy} <FaChevronDown  />
-            {showSortBy && (
-              <Dropdown>
-                {['Client', 'Bot ID', 'Token'].map((option) => (
-                  <DropdownItem
-                    key={option}
-                    onClick={() => {
-                      setSelectedSortBy(option);
-                      setShowSortBy(false);
-                    }}
-                  >
-                    {option}
-                  </DropdownItem>
-                ))}
-              </Dropdown>
-            )}
-          </SortSelect>
+            <SortSelect rounded onClick={() => setShowSortBy(!showSortBy)}>
+              {selectedSortBy} <FaChevronDown />
+              {showSortBy && (
+                <Dropdown>
+                  {["Client", "Bot ID", "Token"].map((option) => (
+                    <DropdownItem
+                      key={option}
+                      onClick={() => {
+                        setSelectedSortBy(option);
+                        setShowSortBy(false);
+                      }}
+                    >
+                      {option}
+                    </DropdownItem>
+                  ))}
+                </Dropdown>
+              )}
+            </SortSelect>
 
-          <SortSelect onClick={() => setShowOrder(!showOrder)}>
-            {selectedOrder} <FaChevronDown  />
-            {showOrder && (
-              <Dropdown>
-                {['A - Z', 'Z - A'].map((option) => (
-                  <DropdownItem
-                    key={option}
-                    onClick={() => {
-                      setSelectedOrder(option);
-                      setShowOrder(false);
-                    }}
-                  >
-                    {option}
-                  </DropdownItem>
-                ))}
-              </Dropdown>
-            )}
-          </SortSelect>
+            <SortSelect onClick={() => setShowOrder(!showOrder)}>
+              {selectedOrder} <FaChevronDown />
+              {showOrder && (
+                <Dropdown>
+                  {["A - Z", "Z - A"].map((option) => (
+                    <DropdownItem
+                      key={option}
+                      onClick={() => {
+                        setSelectedOrder(option);
+                        setShowOrder(false);
+                      }}
+                    >
+                      {option}
+                    </DropdownItem>
+                  ))}
+                </Dropdown>
+              )}
+            </SortSelect>
           </SortSelects>
         </SearchSortBar>
       </Header>
@@ -459,55 +494,67 @@ const AccountComponent = () => {
       <Main>
         <Title>Accounts</Title>
         <CardGrid>
-          {accounts.map((account, index) => (
-            <Card key={index}>
-              <CardTop>
-                <CardTopLeft>
-                  <Label>Client name : {account.clientName}</Label>
-                  <InfoLine>Bot ID : <span>{account.botId}</span></InfoLine>
-                  <CardTopCenter>
-                  <CardTopCenterInfo>
-                    <CardTopCenterInfoHeading>
-                    Number of chats
-                    </CardTopCenterInfoHeading>
-                    <CardTopCenterInfoLeftContainer>
-                      <CardTopCenterInfoLeft>
-                        <MdOutlineMarkChatUnread />
-                      {account.chats}
-                      </CardTopCenterInfoLeft>
-                      <CardTopCenterInfoRight>
-                        <FaArrowDown />
-                        {account.tokenUsage}
-                      </CardTopCenterInfoRight>
-                    </CardTopCenterInfoLeftContainer>
-                  </CardTopCenterInfo>
-                  <CardTopCenterInfo>
-                  <CardTopCenterInfoHeading>
-                    Usage of token
-                    </CardTopCenterInfoHeading>
-                    <CardTopCenterInfoLeftContainer>
-                      <CardTopCenterInfoLeft>
-                        <img src={bar} alt='icon' />
-                      {account.chats}
-                      </CardTopCenterInfoLeft>
-                      <CardTopCenterInfoRight>
-                        <FaArrowDown />
-                        {account.tokenUsage}
-                      </CardTopCenterInfoRight>
-                    </CardTopCenterInfoLeftContainer>
-                  </CardTopCenterInfo>
-                  </CardTopCenter>
-                </CardTopLeft>
-                <IconGroup>
-                  <FaRegEdit fontSize={20} />
-                  <FaRegTrashAlt fontSize={19} />
-                </IconGroup>
-              </CardTop>
-              <CardBottom>
-                <SwitchButton><TbArrowsRightLeft fontSize={20} /> Switch to Account</SwitchButton>
-              </CardBottom>
-            </Card>
-          ))}
+          {isLoading ? (
+            <ListLoader />
+          ) : isError ? (
+            <p>Error Fetching Accounts</p>
+          ) : (
+            data?.results?.map((account, index) => (
+              <Card key={index}>
+                <CardTop>
+                  <CardTopLeft>
+                    <Label>Client name : {account.full_name}</Label>
+                    <InfoLine>
+                      Bot ID : <span>{account.bot_number || "N/A"}</span>
+                    </InfoLine>
+                    <CardTopCenter>
+                      <CardTopCenterInfo>
+                        <CardTopCenterInfoHeading>
+                          Number of chats
+                        </CardTopCenterInfoHeading>
+                        <CardTopCenterInfoLeftContainer>
+                          <CardTopCenterInfoLeft>
+                            <MdOutlineMarkChatUnread />
+                            {account.chat_count || 0}
+                          </CardTopCenterInfoLeft>
+                          <CardTopCenterInfoRight>
+                            <FaArrowDown />
+                            {account.monthly_chat_percentage}
+                          </CardTopCenterInfoRight>
+                        </CardTopCenterInfoLeftContainer>
+                      </CardTopCenterInfo>
+                      <CardTopCenterInfo>
+                        <CardTopCenterInfoHeading>
+                          Usage of token
+                        </CardTopCenterInfoHeading>
+                        <CardTopCenterInfoLeftContainer>
+                          <CardTopCenterInfoLeft>
+                            <img src={bar} alt="icon" />
+                            {account.token_used}
+                          </CardTopCenterInfoLeft>
+                          <CardTopCenterInfoRight>
+                            <FaArrowDown />
+                            {account.monthly_token_percentage}
+                          </CardTopCenterInfoRight>
+                        </CardTopCenterInfoLeftContainer>
+                      </CardTopCenterInfo>
+                    </CardTopCenter>
+                  </CardTopLeft>
+                  <IconGroup>
+                    <FaRegEdit fontSize={20} />
+                    <FaRegTrashAlt fontSize={19} />
+                  </IconGroup>
+                </CardTop>
+                <CardBottom>
+                  <SwitchButton
+                    onClick={() => switchMutation.mutate(account.id)}
+                  >
+                    <TbArrowsRightLeft fontSize={20} /> Switch to Account
+                  </SwitchButton>
+                </CardBottom>
+              </Card>
+            ))
+          )}
         </CardGrid>
       </Main>
     </Container>

@@ -47,6 +47,17 @@ const StatsWrapper = styled.div`
   }
 `;
 
+const StatCardContainer = styled.div`
+  background: #ffffff;
+  padding: 20px 30px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: 0px 10px 60px 0px #e2ecf980;
+`;
+
 const DashboardComponents = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["cardData"],
@@ -96,8 +107,8 @@ const DashboardComponents = () => {
   return (
     <DashboardContainer>
       {/* Stats Cards */}
-      {isLoading && <ListLoader />}
-      {isError && <p>Error Loading Stats.</p>}
+      {isLoading && <StatCardContainer><ListLoader /></StatCardContainer>} 
+      {isError && <StatCardContainer>Error Loading Stats.</StatCardContainer>}
       {!isLoading && !isError && (
         <StatsWrapper>
           {stats.map((stat, index) => (

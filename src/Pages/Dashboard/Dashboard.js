@@ -1,10 +1,19 @@
-import React from 'react'
-import DashboardComponents from '../../Components/Dashboard/DashboardComponents'
+import React, { useEffect } from 'react';
+import DashboardComponents from '../../Components/Dashboard/DashboardComponents';
 
 const Dashboard = () => {
-  return (
-    <DashboardComponents />
-  )
-}
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userToken = urlParams.get('user_token');
+    console.log("urlT", userToken)
 
-export default Dashboard
+    if (userToken) {
+      localStorage.setItem('authToken', userToken);
+    }
+  }, []);
+
+
+  return <DashboardComponents />;
+};
+
+export default Dashboard;

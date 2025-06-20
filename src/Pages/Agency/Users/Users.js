@@ -1,9 +1,9 @@
 import React from 'react'
-import UsersComponents from '../../../Components/SuperAdmin/Users/UsersComponent'
+import AgencyUsersComponents from '../../../Components/Agency/Users/UsersComponent'
 
 const AgencyUsers = () => {
   return (
-    <UsersComponents />
+    <AgencyUsersComponents />
   )
 }
 

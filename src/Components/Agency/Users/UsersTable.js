@@ -7,22 +7,13 @@ import { LuPencil } from "react-icons/lu";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { Table, Thead, Tbody, Tr, Th, Td } from "react-super-responsive-table";
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css";
+import UpdateUserModal from "./UpdateUser";
+import DeleteUserModal from "./DeleteUser";
 
 // Reuse your styled components for container, card, header, etc.
 
 const Container = styled.div`
   min-height: 100vh;
-`;
-
-const Card = styled.div`
-  background: #ffffff;
-  border-radius: 30px;
-  padding: 2rem;
-  box-shadow: 0px 10px 60px 0px #e2ecf980;
-  
-  @media (max-width: 768px) {
-    padding: 20px;
-  }
 `;
 
 const Header = styled.div`
@@ -403,26 +394,29 @@ const usersTable = [
 const UsersTable = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Newest");
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleSelect = (option) => {
     setSelected(option);
     setIsOpen(false);
   };
 
+  
   const handleEdit = (user) => {
-    console.log("Edit user:", user);
-    // your logic here (e.g., open modal)
+    setSelectedUser(user);
+    setShowUpdateModal(true);
   };
   
   const handleDelete = (user) => {
-    console.log("Delete user:", user);
-    // your logic here (e.g., confirmation dialog)
+    setSelectedUser(user);
+    setShowDeleteModal(true);
   };
   
 
   return (
     <Container>
-      <Card>
         <Header>
           <TitleGroup>
             <MainTitle>All Users</MainTitle>
@@ -514,7 +508,18 @@ const UsersTable = () => {
             </button>
           </PageNumbers>
         </Pagination>
-      </Card>
+        
+              <UpdateUserModal
+          isOpen={showUpdateModal}
+          onClose={() => setShowUpdateModal(false)}
+          user={selectedUser}
+        />
+        
+        <DeleteUserModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          user={selectedUser}
+        />
     </Container>
   );
 };

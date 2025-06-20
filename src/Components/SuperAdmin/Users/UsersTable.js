@@ -9,6 +9,8 @@ import { Table, Thead, Tbody, Tr, Th, Td } from "react-super-responsive-table";
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminUsers } from "../../../apis/SuperAdmin/getAdminUsers";
+import UpdateUser from "./UpdateUser";
+import DeleteUser from "./DeleteUser";
 
 // Reuse your styled components for container, card, header, etc.
 
@@ -381,6 +383,10 @@ const UsersTable = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Newest");
   const [page, setPage] = useState(1);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [selectedUser, setSelectedUser] = useState(null);
+
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["users", page],
@@ -393,14 +399,15 @@ const UsersTable = () => {
     setIsOpen(false);
   };
 
-  const handleEdit = (user) => {
-    console.log("Edit user:", user);
-    // your logic here (e.g., open modal)
-  };
 
+  const handleEdit = (user) => {
+    setSelectedUser(user);
+    setShowUpdateModal(true);
+  };
+  
   const handleDelete = (user) => {
-    console.log("Delete user:", user);
-    // your logic here (e.g., confirmation dialog)
+    setSelectedUser(user);
+    setShowDeleteModal(true);
   };
 
   return (
@@ -471,13 +478,13 @@ const UsersTable = () => {
                     <ActionButtons>
                       <button
                         onClick={() => handleEdit(cust)}
-                        style={{ background: "none", border: "none" }}
+                        style={{ background: "none", border: "none", cursor: "pointer" }}
                       >
                         <LuPencil size={18} />
                       </button>
                       <button
                         onClick={() => handleDelete(cust)}
-                        style={{ background: "none", border: "none" }}
+                        style={{ background: "none", border: "none", cursor: "pointer" }}
                       >
                         <MdOutlineDeleteOutline size={20} />
                       </button>
@@ -521,6 +528,17 @@ const UsersTable = () => {
           </PageNumbers>
         </Pagination>
       </Card>
+      <UpdateUser
+  isOpen={showUpdateModal}
+  onClose={() => setShowUpdateModal(false)}
+  user={selectedUser}
+/>
+
+<DeleteUser
+  isOpen={showDeleteModal}
+  onClose={() => setShowDeleteModal(false)}
+  user={selectedUser}
+/>
     </Container>
   );
 };

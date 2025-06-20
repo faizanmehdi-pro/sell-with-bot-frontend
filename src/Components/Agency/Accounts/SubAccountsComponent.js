@@ -14,6 +14,8 @@ import { TbArrowsRightLeft } from "react-icons/tb";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import bar from "../../../assets/SuperAdmin/accounts/bar.png";
+import CreateSubAccount from "./CreateSubAccount";
+import DeleteSubAccountModal from "./DeleteSubAccount";
 
 const Container = styled.div`
   display: flex;
@@ -183,32 +185,11 @@ const Main = styled.div`
   display: flex;
   flex-direction: column;
   gap: 30px;
+  border-radius: 10px;
 
   @media (max-width: 550px) {
     gap: 20px;
     padding: 20px;
-  }
-`;
-
-const Title = styled.h2`
-  font-size: 13px;
-  color: #3182ce;
-  font-weight: 600;
-  font-family: "Poppins", sans-serif;
-  margin: 0;
-  position: relative;
-  display: inline-block;
-  border-bottom: 1px solid #e6e7e9;
-  padding: 0 0 10px 16px;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    height: 2px;
-    width: 130px;
-    background-color: #3182ce;
   }
 `;
 
@@ -336,11 +317,13 @@ const InfoLine = styled.div`
   }
 `;
 
-const IconGroup = styled.div`
+const IconGroup = styled.button`
   display: flex;
   align-items: center;
-  gap: 15px;
   color: #828894;
+  border: none;
+  background: none;
+  outline: none;
   cursor: pointer;
   position: absolute;
   right: 20px;
@@ -379,6 +362,34 @@ const SwitchButton = styled.button`
   }
 `;
 
+const Tabs = styled.div`
+  display: flex;
+  border-bottom: 1px solid #e6e7e9;
+  gap: 10px;
+`;
+
+const TabButton = styled.button`
+  padding: 10px 20px;
+  font-size: 13px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  border: none;
+  outline: none;
+  background: none;
+  border-bottom: ${({ active }) => (active ? "1px solid #3182ce" : "none")};
+  color: ${({ active }) => (active ? "#3182ce" : "#212121")};
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    color: #3182ce;
+  }
+  
+  @media (max-width: 420px) {
+    padding: 10px 5px;
+  }
+`;
+
 const SubAccountComponent = () => {
   const accounts = Array(6).fill({
     clientName: "Akshay Syal",
@@ -393,6 +404,15 @@ const SubAccountComponent = () => {
   const [showOrder, setShowOrder] = useState(false);
   const [selectedSortBy, setSelectedSortBy] = useState("Sort By");
   const [selectedOrder, setSelectedOrder] = useState("A - Z");
+  const [tab, setTab] = useState("list");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  
+  const handleDelete = (user) => {
+    setSelectedUser(user);
+    setShowDeleteModal(true);
+  };
 
   return (
     <Container>
@@ -463,7 +483,15 @@ const SubAccountComponent = () => {
       </Header>
 
       <Main>
-        <Title>Sub-Accounts</Title>
+    <Tabs>
+      <TabButton active={tab === "list"} onClick={() => setTab("list")}>
+        Sub-Accounts
+      </TabButton>
+      <TabButton active={tab === "create"} onClick={() => setTab("create")}>
+        Create Sub-Account
+      </TabButton>
+    </Tabs>
+    {tab === "list" ? (
         <CardGrid>
           {accounts.map((account, index) => (
             <Card key={index}>
@@ -506,8 +534,7 @@ const SubAccountComponent = () => {
                     </CardTopCenterInfo>
                   </CardTopCenter>
                 </CardTopLeft>
-                <IconGroup>
-                  <FaRegEdit fontSize={20} />
+                <IconGroup onClick={() => handleDelete(account)}>
                   <FaRegTrashAlt fontSize={19} />
                 </IconGroup>
               </CardTop>
@@ -519,7 +546,15 @@ const SubAccountComponent = () => {
             </Card>
           ))}
         </CardGrid>
+      ) : (
+        <CreateSubAccount />
+      )}
       </Main>
+        <DeleteSubAccountModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          user={selectedUser}
+        />
     </Container>
   );
 };

@@ -33,6 +33,8 @@ import TestBot from "../../assets/sidebarIcons/test.png";
 import TestBotA from "../../assets/sidebarIcons/TestA.png";
 import IntegrationIcon from "../../assets/sidebarIcons/integrations.png";
 import IntegrationIconA from "../../assets/sidebarIcons/IntegrationsA.png";
+import { useQuery } from "@tanstack/react-query";
+import { getDashboaedData } from "../../apis/getDashboaedData";
 
 const drawerWidth = 265;
 
@@ -60,7 +62,14 @@ const getTitleFromPath = (path) => {
 function MainDrawer() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const location = useLocation();
-  const currentPath = location.pathname;
+  const currentPath = location.pathname; 
+
+  const { data } = useQuery({
+    queryKey: ["cardData"],
+    queryFn: getDashboaedData,
+  });
+
+  const currentBotNumber = data?.current_bot_number ?? "Bot-000";
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -72,6 +81,7 @@ function MainDrawer() {
         <img src={logo} alt="SellWithBot" />
       </LogoContainer>
       <LogoDivider />
+      <BotNumber>{currentBotNumber}</BotNumber>
       <List>
         <ListItem disablePadding>
           {currentPath === "/dashboard" ? (
@@ -429,4 +439,10 @@ const MainWrapper = styled.div`
   @media (max-width: 990px) {
     flex-direction: column;
   }
+`;
+
+const BotNumber = styled.h2`
+  color: #3182ce;
+  font-size: 16px;
+  text-align: center;
 `;

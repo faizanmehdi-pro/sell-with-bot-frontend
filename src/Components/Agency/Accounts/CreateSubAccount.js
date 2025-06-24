@@ -13,6 +13,10 @@ import { useQueryClient } from '@tanstack/react-query';
 const Container = styled.div`
   background: #fff;
   padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 const SignupBox = styled.div`
@@ -48,6 +52,11 @@ const CombinedFields = styled.div`
   align-items: center;
   gap: 15px;
   width: 100%;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+  }
 `;
 
 const Label = styled.label`

@@ -8,6 +8,7 @@ const api = axios.create({
 
 export const getDashboaedData = async () => {
   const userToken = localStorage.getItem("authToken");
+  // const API_KEY = `token eb3d711bc7bb1de913e6e67abebaab7129fa15e6`;
   const API_KEY = `token ${userToken}`;
 
   const response = await api.get("api/user-dashboard/", {

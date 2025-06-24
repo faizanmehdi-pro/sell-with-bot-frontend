@@ -18,6 +18,11 @@ const Modal = styled.div`
   width: 100%;
   max-width: 400px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  
+  @media (max-width: 420px) {
+    margin: 0 10px;
+    padding: 30px 20px;
+  }
 `;
 
 const Title = styled.h2`

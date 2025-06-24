@@ -9,6 +9,7 @@ import CU from '../../assets/Dashboard/CreditUsed.png'
 import Responses from '../../assets/Dashboard/Responses.png'
 import Respond from '../../assets/Dashboard/Respond.png'
 import Appointments from '../../assets/Dashboard/Appointment.png'
+// import FollowUps from '../../assets/Dashboard/followUps.png'
 import Chat from '../../assets/Dashboard/Chat.png'
 
 const DashboardContainer = styled.div`
@@ -16,6 +17,10 @@ const DashboardContainer = styled.div`
   flex-direction: column;
   gap: 30px;
   padding: 30px;
+  
+  @media (max-width: 990px) {
+    padding: 0;
+  }
 `;
 const ListLoader = styled.div`
   border: 4px solid #3182CE;
@@ -39,11 +44,16 @@ const ListLoader = styled.div`
 const StatsWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  column-gap: 20px;
-  row-gap: 40px;
+  grid-gap: 30px;
+
+  
+  @media (max-width: 1700px) {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-gap: 20px;
+  }
 
   @media (max-width: 768px) {
-    padding: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
   }
 `;
 
@@ -62,7 +72,7 @@ const DashboardComponents = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["cardData"],
     queryFn: getDashboaedData,
-  });
+  }); 
 
   const stats = data
     ? [
@@ -78,17 +88,17 @@ const DashboardComponents = () => {
         },
         {
           title: "Responses",
-          value: data.total_ai_responses,
+          value: data.total_sms_responses,
           icon: Responses
         },
         // {
         //   title: "Follow-Ups",
         //   value: data.total_followups,
-        //   icon: <FaReply size={30} />,
+        //   icon: FollowUps
         // },
         {
           title: "Responded",
-          value: data.total_ai_responses,
+          value: data.total_ai_responded,
           icon: Respond
         },
         {

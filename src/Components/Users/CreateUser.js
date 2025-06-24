@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from "react-toastify";
+import { createDashboardUser } from "../../apis/Users/createDashboardUser";
 
 
 // Styled components (same as before)
@@ -78,17 +79,6 @@ const Input = styled.input`
   outline: none;
 `;
 
-const Select = styled.select`
-  width: 100%;
-  height: 44px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 16px;
-  background: white;
-  outline: none;
-`;
-
 const PasswordWrapper = styled.div`
   position: relative;
   width: 100%;
@@ -116,7 +106,8 @@ const EyeButton = styled.button`
 
 const Button = styled.button`
   align-self: flex-end;
-  padding: 12px 20px;
+  width: 130px;
+  height: 40px;
   background: ${(props) => (props.disabled ? "#ccc" : "#3182ce")};
   color: white;
   border: none;
@@ -137,7 +128,7 @@ const ErrorText = styled.p`
   margin: 5px 2px;
 `;
 
-export const Loader = styled.div`
+const Loader = styled.div`
   border: 4px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top: 4px solid #fff;
@@ -162,38 +153,40 @@ const validationSchema = Yup.object().shape({
   phone: Yup.string().required("Phone is required"),
 });
 
-const CreateUser = () => {
+const CreateUser = ({setTab}) => {
   const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setloading] = useState(false);
   
+  const mutation = useMutation({
+    mutationFn: createDashboardUser,
+    onSuccess: (data) => {
+      setloading(false);
+      toast.success(data.message || "User Created Successfully.!");
+      queryClient.invalidateQueries(["dashboard-users"]); // optional: replace with your actual query key
+      setTab("list");
+    },
+    onError: (error) => {
+      setloading(false);
+      toast.error(error.message || "Something went wrong");
+    },
+  });
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const handleSubmit = async (values) => {
     setError("");
-
-    // const payload = {
-    //   first_name: values.fullName,
-    //   last_name: values.lastName,
-    //   email: values.email,
-    //   password: values.password,
-    //   phone_number: values.phone,
-    //   industry: values.industry,
-    //   software: values.software,
-    //   industry_about: values.referralSource,
-    //   terms_accepted: values.termsAccepted,
-    // };
-
-    // try {
-    //   const response = await signupUser(payload);
-    //   toast.success(response.message || "Please verify your email with the OTP sent.!");
-    //   navigate("/verify-otp", { state: { email: values.email } });
-    // } catch (err) {
-    //   toast.error(err.message || "Something went wrong");
-    // } finally {
-    //   setSubmitting(false);
-    // }
+    setloading(true);
+  
+    const payload = {
+      full_name: values.fullName,
+      email: values.email,
+      password: values.password,
+      phone_number: values.phone,
+    };
+  
+      mutation.mutate(payload)
   };
-
+  
   return (
     <Container>
       <SignupBox>
@@ -271,8 +264,8 @@ const CreateUser = () => {
               </CombinedFields>
 
 
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? <Loader /> : "Create User"}
+              <Button type="submit" disabled={loading}>
+                {loading ? <Loader /> : "Create User"}
               </Button>
             </StyledForm>
           )}

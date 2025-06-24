@@ -27,7 +27,6 @@ const Container = styled.div`
 const FilterButtons = styled.div`
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 10px;
 
@@ -52,6 +51,10 @@ const DateRangeWrapperContainer = styled.div`
   justify-content: center;
   align-items: center;
   gap: 10px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const DateRangeWrapper = styled.div`
@@ -74,14 +77,6 @@ const DateRangeWrapper = styled.div`
     font-size: 16px;
     outline: none;
   }
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-    .react-datepicker-wrapper {
-      width: 100%;
-    }
-  }
 `;
 
 const ChartWrapper = styled.div`
@@ -92,8 +87,12 @@ const ChartWrapper = styled.div`
   width: 800px;
   margin: auto;
 
-  @media (max-width: 990px) {
+  @media (max-width: 1250px) {
     width: 100%;
+  }
+  
+  @media (max-width: 420px) {
+    padding: 10px 0;
   }
 `;
 
@@ -256,7 +255,7 @@ const EngagementChart = () => {
       </DateRangeWrapperContainer>
 
       <ChartWrapper>
-        <h3 style={{ textAlign: 'center' }}>Chat Activity Overview ({view})</h3>
+        <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Chat Activity Overview ({view})</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={filteredData}>
             <CartesianGrid strokeDasharray="3 3" />

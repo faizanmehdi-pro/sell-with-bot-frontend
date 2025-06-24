@@ -37,6 +37,7 @@ import AdminBilling from "./Pages/SuperAdmin/Billing/Billing";
 import Billing from "./Pages/Billing/Billing";
 import AdminUsers from "./Pages/SuperAdmin/Users/Users";
 import Users from "./Pages/Users/Users";
+import BotConversation from "./Components/Dashboard/BotConversations";
 
 const queryClient = new QueryClient();
 
@@ -90,7 +91,7 @@ function App() {
                   path="/bot-conversations"
                   element={
                     <ProtectedRoute>
-                      <MessageTable />
+                      <BotConversation/>
                     </ProtectedRoute>
                   }
                 />

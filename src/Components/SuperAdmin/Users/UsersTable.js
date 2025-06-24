@@ -392,7 +392,7 @@ const [selectedUser, setSelectedUser] = useState(null);
     queryKey: ["users", page],
     queryFn: () => getAdminUsers(page),
     keepPreviousData: true,
-  });
+  }); 
 
   const handleSelect = (option) => {
     setSelected(option);

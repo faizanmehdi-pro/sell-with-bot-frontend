@@ -8,8 +8,12 @@ const StatCardContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 10px;
   box-shadow: 0px 10px 60px 0px #e2ecf980;
+  
+  @media (max-width: 1700px) {
+    padding: 20px 25px;
+  }
 `;
 
 const CardTitle = styled.h1`
@@ -17,6 +21,10 @@ const CardTitle = styled.h1`
   font-size: 32px;
   font-weight: 600;
   font-family: "Poppins";
+  
+  @media (max-width: 1700px) {
+    font-size: 20px;
+  }
 `;
 
 const StatValue = styled.h2`
@@ -24,6 +32,10 @@ const StatValue = styled.h2`
   font-size: 36px;
   font-weight: 600;
   font-family: "Poppins";
+  
+  @media (max-width: 1700px) {
+    font-size: 24px;
+  }
 `;
 
 const IconContainer = styled.div`
@@ -34,6 +46,22 @@ const IconContainer = styled.div`
   justify-content: center;
   align-items: center;
   border-radius: 100%;
+
+  img{
+    width: 50px;
+    height: 50px;
+  }
+
+  
+  @media (max-width: 1700px) {
+    width: 64px;
+    height: 64px;
+
+  img{
+    width: 34px;
+    height: 34px;
+  }
+  }
 `;
 
 const StatCard = ({ title, value, icon }) => (

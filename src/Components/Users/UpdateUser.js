@@ -3,6 +3,10 @@ import styled from "styled-components";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateDashboardUserByID } from "../../apis/Users/updateDashboardUserByID";
+import { toast } from "react-toastify";
+import { Loader } from "lucide-react";
 
 const Overlay = styled.div`
   position: fixed;
@@ -73,17 +77,6 @@ const Input = styled.input`
   outline: none;
 `;
 
-const Select = styled.select`
-  width: 100%;
-  height: 44px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 16px;
-  background: white;
-  outline: none;
-`;
-
 const PasswordWrapper = styled.div`
   position: relative;
   width: 100%;
@@ -134,6 +127,23 @@ const CancelButton = styled(Button)`
 const SubmitButton = styled(Button)`
   background: #3182ce;
   color: white;
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+`;
+
+const FormLoader = styled.div`
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 `;
 
 const UpdateUserModal = ({ isOpen, onClose, user }) => {
@@ -145,13 +155,15 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (user) {
       setFormData({
-        full_name: user.name || "",
+        full_name: user.full_name || "",
         email: user.email || "",
-        phone_number: user.phone || "",
+        phone_number: user.phone_number || "",
         password: "",
       });
     }
@@ -166,11 +178,33 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
     setFormData((prev) => ({ ...prev, phone_number: value }));
   };
 
+  const mutation = useMutation({
+    mutationFn: ({ id, data }) => updateDashboardUserByID(id, data),
+    onSuccess: () => {
+      setLoading(false);
+      toast.success("User updated successfully");
+      queryClient.invalidateQueries(["dashboard-users"]);
+      onClose();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+      setLoading(false);
+    },
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Updated user:", formData);
-    // Call your API to update the user here
-    onClose();
+
+    if (!user?.id) {
+      toast.error("Invalid user ID");
+      return;
+    }
+
+    const payload = { ...formData };
+    if (!payload.password) delete payload.password;
+    setLoading(true);
+
+    mutation.mutate({ id: user.id, data: payload });
   };
 
   return (
@@ -223,7 +257,7 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
                 }}
               />
             </FormGroup>
-            
+
             <FormGroup>
               <Label>Password</Label>
               <PasswordWrapper>
@@ -238,11 +272,7 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <AiOutlineEyeInvisible />
-                  ) : (
-                    <AiOutlineEye />
-                  )}
+                  {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
                 </EyeButton>
               </PasswordWrapper>
             </FormGroup>
@@ -252,7 +282,9 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
             <CancelButton type="button" onClick={onClose}>
               Cancel
             </CancelButton>
-            <SubmitButton type="submit">Update</SubmitButton>
+            <SubmitButton type="submit" disabled={loading}>
+              {loading ? <FormLoader /> : "Update"}
+            </SubmitButton>
           </Actions>
         </StyledForm>
       </Modal>

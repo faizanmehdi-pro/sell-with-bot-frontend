@@ -243,8 +243,8 @@ const Signup = () => {
       navigate("/dashboard");
       
       login(response?.data?.token);
-      localStorage.setItem("user-ID", response?.data?.user_id)
-      localStorage.setItem("userName", response?.data?.email)
+      sessionStorage.setItem("user-ID", response?.data?.user_id)
+      sessionStorage.setItem("userName", response?.data?.email)
       queryClient.removeQueries({ queryKey: ["botDetails"] });
     } catch (error) {
       console.error("Login failed", error);

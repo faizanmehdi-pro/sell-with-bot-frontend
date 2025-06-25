@@ -157,7 +157,7 @@ const LoginAdminForm = () => {
       login(data.response.access_token);
       navigate("/super-admin-dashboard");
       toast.success("Login Successfully!");
-      localStorage.setItem("user-ID", data.response.profile.id)
+      sessionStorage.setItem("user-ID", data.response.profile.id)
     },
     onError: (error) => {
       toast.error(error.message);

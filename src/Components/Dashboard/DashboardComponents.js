@@ -69,9 +69,10 @@ const StatCardContainer = styled.div`
 `;
 
 const DashboardComponents = () => {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["cardData"],
     queryFn: getDashboaedData,
+    retry: false,
   }); 
 
   const stats = data
@@ -118,7 +119,7 @@ const DashboardComponents = () => {
     <DashboardContainer>
       {/* Stats Cards */}
       {isLoading && <StatCardContainer><ListLoader /></StatCardContainer>} 
-      {isError && <StatCardContainer>Error Loading Stats.</StatCardContainer>}
+      {isError && <StatCardContainer>{error?.message || "Error Loading Stats."}</StatCardContainer>}
       {!isLoading && !isError && (
         <StatsWrapper>
           {stats.map((stat, index) => (

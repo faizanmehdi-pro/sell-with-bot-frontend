@@ -7,7 +7,7 @@ const api = axios.create({
 });
 
 export const getAdminDashboardSummary = async () => {
-  const userToken = localStorage.getItem("adminAuthToken");
+  const userToken = sessionStorage.getItem("adminAuthToken");
   const API_KEY = `token ${userToken}`;
 
   const response = await api.get(`/api/dashboard-summary/`, {

@@ -318,6 +318,7 @@ const UsersTable = () => {
     queryKey: ["dashboard-users"],
     queryFn: () => getDashboardUsers(),
     keepPreviousData: true,
+    retry: false,
   });
 
   const handleSelect = (option) => {

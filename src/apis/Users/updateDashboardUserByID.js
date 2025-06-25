@@ -7,7 +7,7 @@ const api = axios.create({
 });
 
 export const updateDashboardUserByID = async (id, updatedData) => {
-  const userToken = localStorage.getItem("authToken");
+  const userToken = sessionStorage.getItem("authToken");
   const API_KEY = `token ${userToken}`;
 
   try {

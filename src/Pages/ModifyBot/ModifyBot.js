@@ -44,13 +44,13 @@ const CardContainer = styled.div`
 
 const ModifyBot = () => {
   const getInitialTab = () => {
-    return localStorage.getItem("activeTab") || "Integrate";
+    return sessionStorage.getItem("activeTab") || "Integrate";
   };
 
   const [activeTab, setActiveTab] = useState(getInitialTab);
 
   useEffect(() => {
-    localStorage.setItem("activeTab", activeTab);
+    sessionStorage.setItem("activeTab", activeTab);
   }, [activeTab]);
 
   return (

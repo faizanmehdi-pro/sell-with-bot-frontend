@@ -8,7 +8,7 @@ const Dashboard = () => {
     console.log("urlT", userToken)
 
     if (userToken) {
-      localStorage.setItem('authToken', userToken);
+      sessionStorage.setItem('authToken', userToken);
     }
   }, []);
 

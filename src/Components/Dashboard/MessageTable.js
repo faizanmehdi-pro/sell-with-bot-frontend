@@ -176,7 +176,7 @@ const ListLoader = styled.div`
 `;
 
 const MessageTable = () => {
-  const userToken = localStorage.getItem("authToken");
+  const userToken = sessionStorage.getItem("authToken");
   const API_KEY = `token ${userToken}`;
   const [search, setSearch] = useState("");
   const [loadingIndex, setLoadingIndex] = useState(null);

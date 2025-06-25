@@ -7,7 +7,7 @@ const api = axios.create({
 });
 
 export const updateBot = async (data) => {
-  const userToken = localStorage.getItem("authToken");
+  const userToken = sessionStorage.getItem("authToken");
   const API_KEY = `token ${userToken}`;
 
   let payload = {};

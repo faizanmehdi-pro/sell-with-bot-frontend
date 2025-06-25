@@ -100,6 +100,7 @@ const StyledTable = styled(Table)`
     padding: 12px 10px;
     border-bottom: 1px solid #eeeeee;
     max-width: 200px;
+    /* vertical-align: top; */
   }
 
   td:nth-child(5) {
@@ -282,7 +283,7 @@ const Spinner = styled(FaSpinner)`
 `;
 
 const BotConversation = () => {
-  const userToken = localStorage.getItem("authToken");
+  const userToken = sessionStorage.getItem("authToken");
   const API_KEY = `token ${userToken}`;
   const [search, setSearch] = useState("");
   const [loadingIndex, setLoadingIndex] = useState(null);
@@ -328,6 +329,7 @@ const BotConversation = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["chatResults"],
     queryFn: chatTableHistory,
+    retry: false,
   });
 
   // if (isLoading) return <Container><ListLoader /></Container>;

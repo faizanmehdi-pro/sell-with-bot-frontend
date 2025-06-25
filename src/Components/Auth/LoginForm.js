@@ -195,8 +195,8 @@ const Login = () => {
         navigate("/dashboard");
         
         login(response?.data?.token);
-        localStorage.setItem("user-ID", response?.data?.user_id)
-        localStorage.setItem("userName", response?.data?.email)
+        sessionStorage.setItem("user-ID", response?.data?.user_id)
+        sessionStorage.setItem("userName", response?.data?.email)
         queryClient.removeQueries({ queryKey: ["botDetails"] });
       } catch (error) {
         console.error("Login failed", error);
@@ -214,8 +214,8 @@ const Login = () => {
       login(data.token);
       navigate("/dashboard");
       toast.success("User Login Successfully!");
-      localStorage.setItem("user-ID", data.user_id)
-      localStorage.setItem("userName", data?.email)
+      sessionStorage.setItem("user-ID", data.user_id)
+      sessionStorage.setItem("userName", data?.email)
       queryClient.removeQueries({ queryKey: ["botDetails"] });
     },
     onError: (error) => {

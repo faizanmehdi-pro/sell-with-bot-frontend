@@ -7,7 +7,7 @@ const api = axios.create({
 });
 
 export const reconnectAccount = async ({ location_id }) => {
-  const userToken = localStorage.getItem("authToken");
+  const userToken = sessionStorage.getItem("authToken");
   if (!userToken) throw new Error("User token not found");
 
   const API_KEY = `token ${userToken}`;

@@ -18,6 +18,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getAdminUserAccountsList } from "../../../apis/SuperAdmin/getAdminUserAccountsList";
 import { toast } from "react-toastify";
 import { switchToAccount } from "../../../apis/SuperAdmin/switchToAccount";
+import { useAuth } from "../../Auth/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -398,6 +400,8 @@ const ListLoader = styled.div`
 `;
 
 const AccountComponent = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -405,6 +409,7 @@ const AccountComponent = () => {
   const [showOrder, setShowOrder] = useState(false);
   const [selectedSortBy, setSelectedSortBy] = useState("Sort By");
   const [selectedOrder, setSelectedOrder] = useState("A - Z");
+  const [activeSwitchId, setActiveSwitchId] = useState(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["accounts"],
@@ -414,12 +419,22 @@ const AccountComponent = () => {
 
   const switchMutation = useMutation({
     mutationFn: (userId) => switchToAccount(userId),
+    onMutate: (userId) => {
+      setActiveSwitchId(userId); // show loader for the selected ID
+    },
     onSuccess: (resp) => {
       toast.success("Switched account successfully");
+      sessionStorage.setItem("authToken", resp?.user_token);
+      login(resp?.user_token);
+      // window.open("http://localhost:3000/dashboard", "_self");
+      // navigate("/dashboard");
       window.open(resp?.url_data, "_self");
     },
     onError: () => {
       toast.error("Failed to switch account");
+    },
+    onSettled: () => {
+      setActiveSwitchId(null); // reset loader
     },
   });
 
@@ -548,8 +563,21 @@ const AccountComponent = () => {
                 <CardBottom>
                   <SwitchButton
                     onClick={() => switchMutation.mutate(account.id)}
+                    disabled={activeSwitchId === account.id}
                   >
-                    <TbArrowsRightLeft fontSize={20} /> Switch to Account
+                    {activeSwitchId === account.id ? (
+                      <ListLoader
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          borderWidth: "2px",
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <TbArrowsRightLeft fontSize={20} /> Switch to Account
+                      </>
+                    )}
                   </SwitchButton>
                 </CardBottom>
               </Card>

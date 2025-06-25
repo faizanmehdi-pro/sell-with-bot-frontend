@@ -58,7 +58,7 @@ function MainDrawer() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const userName = localStorage.getItem("userName") || "User";
+  const userName = sessionStorage.getItem("userName") || "User";
   const userInitial = userName.charAt(0).toUpperCase();
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -74,8 +74,8 @@ function MainDrawer() {
 
   const handleLogout = () => {
     queryClient.clear();
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userName"); // Optional
+    sessionStorage.removeItem("authToken");
+    sessionStorage.removeItem("userName"); // Optional
     navigate("/");
     toast.success("User Logout Successfully!");
   };

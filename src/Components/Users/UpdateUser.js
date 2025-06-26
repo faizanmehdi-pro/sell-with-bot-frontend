@@ -148,10 +148,12 @@ const FormLoader = styled.div`
 
 const UpdateUserModal = ({ isOpen, onClose, user }) => {
   const [formData, setFormData] = useState({
-    full_name: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone_number: "",
     password: "",
+    confirm_password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -161,10 +163,12 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
   useEffect(() => {
     if (user) {
       setFormData({
-        full_name: user.full_name || "",
+        first_name: user.first_name,
+        last_name: user.last_name,
         email: user.email || "",
         phone_number: user.phone_number || "",
         password: "",
+        confirm_password: "",
       });
     }
   }, [user]);
@@ -200,10 +204,21 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
       return;
     }
 
-    const payload = { ...formData };
-    if (!payload.password) delete payload.password;
-    setLoading(true);
+    if (formData.password && formData.password !== formData.confirm_password) {
+      toast.error("Passwords do not match");
+      return;
+    }
 
+    const payload = {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      phone_number: formData.phone_number,
+    };
+
+    if (formData.password) payload.password = formData.password;
+
+    setLoading(true);
     mutation.mutate({ id: user.id, data: payload });
   };
 
@@ -214,16 +229,29 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
         <StyledForm onSubmit={handleSubmit}>
           <CombinedFields>
             <FormGroup>
-              <Label>Full Name</Label>
+              <Label>First Name</Label>
               <Input
                 type="text"
-                name="full_name"
-                value={formData.full_name}
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
-                placeholder="Enter Full Name"
+                placeholder="Enter First Name"
               />
             </FormGroup>
 
+            <FormGroup>
+              <Label>Last Name</Label>
+              <Input
+                type="text"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                placeholder="Enter Last Name"
+              />
+            </FormGroup>
+          </CombinedFields>
+
+          <CombinedFields>
             <FormGroup>
               <Label>Email Address</Label>
               <Input
@@ -234,9 +262,7 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
                 placeholder="Enter Email"
               />
             </FormGroup>
-          </CombinedFields>
 
-          <CombinedFields>
             <FormGroup>
               <Label>Phone</Label>
               <PhoneInput
@@ -257,9 +283,11 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
                 }}
               />
             </FormGroup>
+          </CombinedFields>
 
+          <CombinedFields>
             <FormGroup>
-              <Label>Password</Label>
+              <Label>New Password</Label>
               <PasswordWrapper>
                 <PasswordInput
                   type={showPassword ? "text" : "password"}
@@ -267,6 +295,25 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter new password"
+                />
+                <EyeButton
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                </EyeButton>
+              </PasswordWrapper>
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Confirm Password</Label>
+              <PasswordWrapper>
+                <PasswordInput
+                  type={showPassword ? "text" : "password"}
+                  name="confirm_password"
+                  value={formData.confirm_password}
+                  onChange={handleChange}
+                  placeholder="Confirm Password"
                 />
                 <EyeButton
                   type="button"
@@ -291,5 +338,6 @@ const UpdateUserModal = ({ isOpen, onClose, user }) => {
     </Overlay>
   );
 };
+
 
 export default UpdateUserModal;

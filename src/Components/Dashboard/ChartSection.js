@@ -1,17 +1,17 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useQuery } from '@tanstack/react-query';
 import {
-  format, parseISO, isWithinInterval,
-  getWeekOfMonth, startOfWeek, endOfWeek,
-  startOfMonth, endOfMonth, startOfYear, endOfYear,
+  format, startOfWeek, endOfWeek, startOfMonth,
+  endOfMonth, startOfYear, endOfYear,
 } from 'date-fns';
+import { fetchChatActivity } from '../../apis/WebHook/fetchChatActivity';
 
-// --- Styled Components ---
 const Container = styled.div`
   display: flex;
   justify-content: center;
@@ -77,15 +77,34 @@ const DateRangeWrapper = styled.div`
     font-size: 16px;
     outline: none;
   }
+  
+  @media (max-width: 500px) {
+  gap: 5px;
+  padding: 4px;
+
+  .react-datepicker-wrapper {
+    width: 90px;
+  }
+
+  .react-datepicker__input-container input {
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+  }
+  }
 `;
 
 const ChartWrapper = styled.div`
-  background: #fff;
+  background: #FFFFFF;
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   width: 800px;
   margin: auto;
+  height: 400px;
 
   @media (max-width: 1250px) {
     width: 100%;
@@ -96,52 +115,31 @@ const ChartWrapper = styled.div`
   }
 `;
 
-// --- Constants ---
-const allData = [
-  { date: '2025-01-08', value: 6 },
-  { date: '2025-02-10', value: 4 },
-  { date: '2025-03-01', value: 8 },
-  { date: '2025-01-02', value: 6 },
-  { date: '2025-02-03', value: 7 },
-  { date: '2025-03-08', value: 6 },
-  { date: '2025-04-10', value: 4 },
-  { date: '2025-05-01', value: 8 },
-  { date: '2025-05-02', value: 6 },
-  { date: '2025-05-03', value: 7 },
-  { date: '2025-05-10', value: 15 },
-  { date: '2025-05-11', value: 11 },
-  { date: '2025-05-18', value: 13 },
-  { date: '2025-05-19', value: 10 },
-  { date: '2025-05-20', value: 7 },
-  { date: '2025-05-21', value: 4 },
-  { date: '2025-05-22', value: 10 },
-  { date: '2025-05-23', value: 5 },
-  { date: '2025-05-24', value: 8 },
-  { date: '2025-05-25', value: 6 },
-  { date: '2025-05-26', value: 9 },
-  { date: '2025-05-27', value: 10 },
-  { date: '2025-05-28', value: 5 },
-  { date: '2025-05-29', value: 8 },
-  { date: '2025-05-30', value: 6 },
-  { date: '2025-05-31', value: 9 },
-  { date: '2025-06-01', value: 10 },
-  { date: '2025-07-01', value: 12 },
-  { date: '2025-08-20', value: 5 },
-  { date: '2025-09-01', value: 10 },
-  { date: '2025-10-01', value: 12 },
-  { date: '2025-11-15', value: 7 },
-  { date: '2025-12-20', value: 5 },
-];
+const ListLoader = styled.div`
+  border: 4px solid #3182ce;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
 
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
 
-// --- Component ---
 const EngagementChart = () => {
   const [view, setView] = useState('Daily');
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
+  // Auto-adjust dates when view changes
   useEffect(() => {
     const now = new Date();
     if (view === 'Daily') {
@@ -169,52 +167,21 @@ const EngagementChart = () => {
     }
   };
 
-  const filteredData = useMemo(() => {
-    const inRange = allData.filter((item) =>
-      isWithinInterval(parseISO(item.date), { start: startDate, end: endDate })
-    );
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['chat-activity', view, startDate, endDate],
+    queryFn: () =>
+      fetchChatActivity({
+        view,
+        start_date: format(startDate, 'yyyy-MM-dd'),
+        end_date: format(endDate, 'yyyy-MM-dd'),
+      }),
+    keepPreviousData: true,
+  });
 
-    if (view === 'Daily') {
-      const dayMap = Object.fromEntries(days.map((day) => [day, 0]));
-
-      inRange.forEach((item) => {
-        const label = format(parseISO(item.date), 'EEE');
-        if (dayMap[label] !== undefined) {
-          dayMap[label] += item.value;
-        }
-      });
-
-      return days.map((day) => ({
-        name: day,
-        value: dayMap[day] || 0,
-      }));
-    }
-
-    if (view === 'Weekly') {
-      const weekMap = {};
-      inRange.forEach((item) => {
-        const week = `Week ${getWeekOfMonth(parseISO(item.date))}`;
-        weekMap[week] = (weekMap[week] || 0) + item.value;
-      });
-
-      return Object.entries(weekMap).map(([name, value]) => ({ name, value }));
-    }
-
-    if (view === 'Monthly') {
-      const monthMap = {};
-      inRange.forEach((item) => {
-        const month = format(parseISO(item.date), 'MMM');
-        monthMap[month] = (monthMap[month] || 0) + item.value;
-      });
-
-      return months.map((month) => ({
-        name: month,
-        value: monthMap[month] || 0,
-      }));
-    }
-
-    return [];
-  }, [view, startDate, endDate]);
+  const chartData = data?.labels?.map((label, i) => ({
+    name: label,
+    value: data.data[i],
+  })) || [];
 
   return (
     <Container>
@@ -255,20 +222,31 @@ const EngagementChart = () => {
       </DateRangeWrapperContainer>
 
       <ChartWrapper>
-        <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Chat Activity Overview ({view})</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={filteredData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Bar dataKey="value" fill="#f7941d" barSize={40} radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-        <p style={{ textAlign: 'center', marginTop: '1rem' }}>
-          <span style={{ color: '#f7941d', marginRight: 8 }}>●</span>
-          Chat Activity Overview
-        </p>
+        <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>
+          {data?.title || `Chat Activity Overview (${view})`}
+        </h3>
+
+        {isLoading ? (
+          <ListLoader />
+        ) : error ? (
+          <p style={{ textAlign: 'center', color: 'red' }}>Failed to load data</p>
+        ) : (
+          <>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#f7941d" barSize={40} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+              <span style={{ color: '#f7941d', marginRight: 8 }}>●</span>
+              Chat Activity Overview
+            </p>
+          </>
+        )}
       </ChartWrapper>
     </Container>
   );

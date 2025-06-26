@@ -399,7 +399,7 @@ const UsersTable = () => {
           ) : (
             data?.map((cust, index) => (
               <Tr key={index}>
-                <Td data-label="Full Name">{cust.full_name}</Td>
+                <Td data-label="Full Name">{cust.first_name} {cust.last_name}</Td>
                 <Td data-label="Phone Number">{cust.phone_number}</Td>
                 <Td data-label="Email">{cust.email}</Td>
                 <Td data-label="User Type">{cust.user_type}</Td>

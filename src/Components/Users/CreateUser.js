@@ -5,16 +5,15 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { createDashboardUser } from "../../apis/Users/createDashboardUser";
-
 
 // Styled components (same as before)
 const Container = styled.div`
   background: #fff;
   padding: 20px;
-  
+
   @media (max-width: 768px) {
     padding: 0;
   }
@@ -53,7 +52,7 @@ const CombinedFields = styled.div`
   align-items: center;
   gap: 15px;
   width: 100%;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 0;
@@ -100,7 +99,7 @@ const EyeButton = styled.button`
   color: #777;
 
   &:hover {
-    color: #3182CE;
+    color: #3182ce;
   }
 `;
 
@@ -138,27 +137,35 @@ const Loader = styled.div`
   display: inline-block;
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;
 
-
-
 // Yup validation schema
 const validationSchema = Yup.object().shape({
-  fullName: Yup.string().required("Full Name is required"),
+  first_name: Yup.string().required("First Name is required"),
+  last_name: Yup.string().required("Last Name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  confirm_password: Yup.string()
+    .oneOf([Yup.ref("password"), null], "Passwords must match")
+    .required("Confirm Password is required"),
   phone: Yup.string().required("Phone is required"),
 });
 
-const CreateUser = ({setTab}) => {
+const CreateUser = ({ setTab }) => {
   const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setloading] = useState(false);
-  
+
   const mutation = useMutation({
     mutationFn: createDashboardUser,
     onSuccess: (data) => {
@@ -176,17 +183,18 @@ const CreateUser = ({setTab}) => {
   const handleSubmit = async (values) => {
     setError("");
     setloading(true);
-  
+
     const payload = {
-      full_name: values.fullName,
+      first_name: values.first_name,
+      last_name: values.last_name,
       email: values.email,
       password: values.password,
       phone_number: values.phone,
     };
-  
-      mutation.mutate(payload)
+
+    mutation.mutate(payload);
   };
-  
+
   return (
     <Container>
       <SignupBox>
@@ -195,9 +203,11 @@ const CreateUser = ({setTab}) => {
 
         <Formik
           initialValues={{
-            fullName: "",
+            first_name: "",
+            last_name: "",
             email: "",
             password: "",
+            confirm_password: "",
             phone: "",
           }}
           validationSchema={validationSchema}
@@ -207,9 +217,37 @@ const CreateUser = ({setTab}) => {
             <StyledForm>
               <CombinedFields>
                 <FormGroup>
-                  <Label>Full Name *</Label>
-                  <Field as={Input} type="text" name="fullName" placeholder="Enter Full Name" />
-                  <ErrorMessage name="fullName" component={ErrorText} />
+                  <Label>First Name *</Label>
+                  <Field
+                    as={Input}
+                    type="text"
+                    name="first_name"
+                    placeholder="Enter First Name"
+                  />
+                  <ErrorMessage name="first_name" component={ErrorText} />
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>Last Name *</Label>
+                  <Field
+                    as={Input}
+                    type="text"
+                    name="last_name"
+                    placeholder="Enter Last Name"
+                  />
+                  <ErrorMessage name="last_name" component={ErrorText} />
+                </FormGroup>
+              </CombinedFields>
+              <CombinedFields>
+                <FormGroup>
+                  <Label>Email Address *</Label>
+                  <Field
+                    as={Input}
+                    type="email"
+                    name="email"
+                    placeholder="Enter Email Address"
+                  />
+                  <ErrorMessage name="email" component={ErrorText} />
                 </FormGroup>
 
                 <FormGroup>
@@ -217,20 +255,20 @@ const CreateUser = ({setTab}) => {
                   <Field name="phone">
                     {({ field, form }) => (
                       <PhoneInput
-                        country={'us'} // Default country
+                        country={"us"} // Default country
                         value={field.value}
-                        onChange={(value) => form.setFieldValue('phone', value)}
+                        onChange={(value) => form.setFieldValue("phone", value)}
                         inputStyle={{
-                          width: '100%',
-                          height: '44px',
-                          padding: '12px 12px 12px 50px',
-                          borderRadius: '8px',
-                          border: '1px solid #ccc',
-                          fontSize: '16px',
+                          width: "100%",
+                          height: "44px",
+                          padding: "12px 12px 12px 50px",
+                          borderRadius: "8px",
+                          border: "1px solid #ccc",
+                          fontSize: "16px",
                         }}
                         buttonStyle={{
-                          border: 'none',
-                          background: 'transparent',
+                          border: "none",
+                          background: "transparent",
                         }}
                       />
                     )}
@@ -241,12 +279,6 @@ const CreateUser = ({setTab}) => {
 
               <CombinedFields>
                 <FormGroup>
-                  <Label>Email Address *</Label>
-                  <Field as={Input} type="email" name="email" placeholder="Enter Email Address" />
-                  <ErrorMessage name="email" component={ErrorText} />
-                </FormGroup>
-
-                <FormGroup>
                   <Label>Password *</Label>
                   <PasswordWrapper>
                     <Field
@@ -255,14 +287,42 @@ const CreateUser = ({setTab}) => {
                       name="password"
                       placeholder="Enter Password"
                     />
-                    <EyeButton type="button" onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                    <EyeButton
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <AiOutlineEyeInvisible />
+                      ) : (
+                        <AiOutlineEye />
+                      )}
                     </EyeButton>
                   </PasswordWrapper>
                   <ErrorMessage name="password" component={ErrorText} />
                 </FormGroup>
+                <FormGroup>
+                  <Label>Confirm Password *</Label>
+                  <PasswordWrapper>
+                    <Field
+                      as={PasswordInput}
+                      type={showPassword ? "text" : "password"}
+                      name="confirm_password"
+                      placeholder="Confirm Password"
+                    />
+                    <EyeButton
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <AiOutlineEyeInvisible />
+                      ) : (
+                        <AiOutlineEye />
+                      )}
+                    </EyeButton>
+                  </PasswordWrapper>
+                  <ErrorMessage name="confirm_password" component={ErrorText} />
+                </FormGroup>
               </CombinedFields>
-
 
               <Button type="submit" disabled={loading}>
                 {loading ? <Loader /> : "Create User"}

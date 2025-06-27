@@ -13,6 +13,10 @@ const Container = styled.div`
   padding: 30px 50px;
   border-radius: 30px;
   box-shadow: 0px 10px 60px 0px #E2ECF980;
+  
+  @media (max-width: 990px) {
+    padding: 30px 20px;
+  }
 `;
 
 const ToggleContainer = styled.div`
@@ -39,6 +43,15 @@ const Title = styled.h3`
   font-size: 15px;
   font-weight: 600;
   margin: 5px 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  
+  span {
+    font-size: 14px;
+    color: #9ca3af;
+  }
 `;
 
 const TextArea = styled.textarea`
@@ -176,17 +189,11 @@ const RangeInput = styled.input.attrs({ type: "range" })`
 const RangeHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   color: #3182CE;
   font-size: 14px;
   margin-top: 10px;
   margin-bottom: 5px;
-
-  span {
-    font-size: 14px;
-    color: #9ca3af;
-    margin-left: 5px;
-  }
 `;
 
 const MainCard = () => {

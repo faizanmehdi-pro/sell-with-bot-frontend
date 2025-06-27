@@ -19,7 +19,7 @@ import { getAdminUserAccountsList } from "../../../apis/SuperAdmin/getAdminUserA
 import { toast } from "react-toastify";
 import { switchToAccount } from "../../../apis/SuperAdmin/switchToAccount";
 import { useAuth } from "../../Auth/AuthContext";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -401,7 +401,7 @@ const ListLoader = styled.div`
 
 const AccountComponent = () => {
   const { login } = useAuth();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -425,6 +425,11 @@ const AccountComponent = () => {
     onSuccess: (resp) => {
       toast.success("Switched account successfully");
       sessionStorage.setItem("authToken", resp?.user_token);
+      sessionStorage.setItem("userName", resp?.full_name);
+      sessionStorage.setItem("firstName", resp?.first_name);
+      sessionStorage.setItem("lastName", resp?.last_name);
+      sessionStorage.setItem("online", resp?.online);
+      sessionStorage.setItem("botNumber", resp?.bot_number);
       login(resp?.user_token);
       // window.open("http://localhost:3000/dashboard", "_self");
       // navigate("/dashboard");

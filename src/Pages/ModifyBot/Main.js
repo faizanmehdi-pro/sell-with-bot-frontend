@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 import MainSection from "../../Components/ModifyBot/MainSection";
 
-// Styled Components
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -14,6 +13,10 @@ const CardContainer = styled.div`
   align-items: center;
   gap: 20px;
   padding: 30px;
+  
+  @media (max-width: 990px) {
+    padding: 0;
+  }
 `;
 
 const Main = () => {

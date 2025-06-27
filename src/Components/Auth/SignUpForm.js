@@ -12,11 +12,9 @@ import "react-phone-input-2/lib/style.css";
 import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../../Components/Auth/AuthContext";
-import { useQueryClient } from '@tanstack/react-query';
-import logo from '../../assets/images/Logo.png'
+import { useQueryClient } from "@tanstack/react-query";
+import logo from "../../assets/images/Logo.png";
 
-
-// Styled components (same as before)
 const Container = styled.div`
   display: flex;
   justify-content: center;
@@ -32,8 +30,14 @@ const LogoContainer = styled.div`
   align-items: center;
   margin-bottom: 10px;
 
-  img{
-  max-width: 400px;
+  img {
+    max-width: 400px;
+  }
+
+  @media (max-width: 500px) {
+    img {
+      max-width: 90%;
+    }
   }
 `;
 
@@ -42,17 +46,6 @@ const SignupBox = styled.div`
   max-width: 700px;
   width: 100%;
 `;
-
-// const Heading = styled.h1`
-//   font-size: 32px;
-//   font-weight: bold;
-//   color: #3182CE;
-//   text-transform: uppercase;
-//   letter-spacing: 2px;
-//   text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
-//   margin-bottom: 20px;
-//   text-align: left;
-// `;
 
 const SubText = styled.p`
   font-size: 14px;
@@ -76,12 +69,23 @@ const FormGroup = styled.div`
   height: 100px;
 `;
 
+const FormGroupDiff = styled.div`
+  width: 100%;
+  text-align: left;
+  position: relative;
+`;
+
 const CombinedFields = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 15px;
   width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+  }
 `;
 
 const Label = styled.label`
@@ -135,7 +139,7 @@ const EyeButton = styled.button`
   color: #777;
 
   &:hover {
-    color: #3182CE;
+    color: #3182ce;
   }
 `;
 
@@ -144,15 +148,16 @@ const CheckboxContainer = styled.div`
   align-items: center;
   font-size: 14px;
   color: #555;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   align-self: start;
+  text-align: left;
 
   input {
     margin-right: 8px;
   }
 
   a {
-    color: #3182CE;
+    color: #3182ce;
     text-decoration: none;
     font-weight: bold;
 
@@ -173,6 +178,7 @@ const Button = styled.button`
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   font-weight: bold;
   transition: background 0.3s;
+  margin-top: 20px;
 
   &:hover {
     background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
@@ -185,7 +191,7 @@ const LinkText = styled.p`
   margin-top: 10px;
 
   a {
-    color: #3182CE;
+    color: #3182ce;
     text-decoration: none;
     font-weight: bold;
 
@@ -208,14 +214,14 @@ const GoogleLoginWrapper = styled.div`
   margin-top: 10px;
 `;
 
-
-
 // Yup validation schema
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is required"),
   lastName: Yup.string().required("Last Name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
   phone: Yup.string().required("Phone is required"),
   industry: Yup.string().required("Industry is required"),
   software: Yup.string().required("Software is required"),
@@ -234,20 +240,23 @@ const Signup = () => {
     const idToken = credentialResponse.credential;
 
     try {
-      const response = await axios.post("http://54.197.41.35/api/auth/google-login/", {
-        id_token: idToken,
-      });
-      
+      const response = await axios.post(
+        "http://54.197.41.35/api/auth/google-login/",
+        {
+          id_token: idToken,
+        }
+      );
 
       toast.success("Google login successfully!");
       navigate("/dashboard");
-      
+
       login(response?.data?.token);
-      sessionStorage.setItem("user-ID", response?.data?.user_id)
-      sessionStorage.setItem("userName", response?.data?.full_name)
-      sessionStorage.setItem("firstName", response?.data?.first_name)
-      sessionStorage.setItem("lastName", response?.data?.last_name)
-      sessionStorage.setItem("online", response?.data?.online)
+      sessionStorage.setItem("user-ID", response?.data?.user_id);
+      sessionStorage.setItem("userName", response?.data?.full_name);
+      sessionStorage.setItem("firstName", response?.data?.first_name);
+      sessionStorage.setItem("lastName", response?.data?.last_name);
+      sessionStorage.setItem("online", response?.data?.online);
+      sessionStorage.setItem("botNumber", response?.data?.bot_number);
       queryClient.removeQueries({ queryKey: ["botDetails"] });
     } catch (error) {
       console.error("Login failed", error);
@@ -258,7 +267,6 @@ const Signup = () => {
   const handleError = () => {
     toast.error("Google login was unsuccessful. Try again.");
   };
-  
 
   const handleSubmit = async (values, { setSubmitting }) => {
     setError("");
@@ -277,7 +285,9 @@ const Signup = () => {
 
     try {
       const response = await signupUser(payload);
-      toast.success(response.message || "Please verify your email with the OTP sent.!");
+      toast.success(
+        response.message || "Please verify your email with the OTP sent.!"
+      );
       navigate("/verify-otp", { state: { email: values.email } });
     } catch (err) {
       toast.error(err.message || "Something went wrong");
@@ -290,8 +300,8 @@ const Signup = () => {
     <Container>
       <SignupBox>
         <LogoContainer>
-      <img src={logo} alt="logo" />
-      </LogoContainer>
+          <img src={logo} alt="logo" />
+        </LogoContainer>
         {/* <Heading>Sell with Bot</Heading> */}
         {error && <SubText style={{ color: "red" }}>{error}</SubText>}
 
@@ -315,13 +325,23 @@ const Signup = () => {
               <CombinedFields>
                 <FormGroup>
                   <Label>First Name *</Label>
-                  <Field as={Input} type="text" name="firstName" placeholder="Enter First Name" />
+                  <Field
+                    as={Input}
+                    type="text"
+                    name="firstName"
+                    placeholder="Enter First Name"
+                  />
                   <ErrorMessage name="firstName" component={ErrorText} />
                 </FormGroup>
 
                 <FormGroup>
                   <Label>Last Name *</Label>
-                  <Field as={Input} type="text" name="lastName" placeholder="Enter Last Name" />
+                  <Field
+                    as={Input}
+                    type="text"
+                    name="lastName"
+                    placeholder="Enter Last Name"
+                  />
                   <ErrorMessage name="lastName" component={ErrorText} />
                 </FormGroup>
               </CombinedFields>
@@ -329,7 +349,12 @@ const Signup = () => {
               <CombinedFields>
                 <FormGroup>
                   <Label>Email Address *</Label>
-                  <Field as={Input} type="email" name="email" placeholder="Enter Email Address" />
+                  <Field
+                    as={Input}
+                    type="email"
+                    name="email"
+                    placeholder="Enter Email Address"
+                  />
                   <ErrorMessage name="email" component={ErrorText} />
                 </FormGroup>
 
@@ -342,8 +367,15 @@ const Signup = () => {
                       name="password"
                       placeholder="Enter Password"
                     />
-                    <EyeButton type="button" onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                    <EyeButton
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <AiOutlineEyeInvisible />
+                      ) : (
+                        <AiOutlineEye />
+                      )}
                     </EyeButton>
                   </PasswordWrapper>
                   <ErrorMessage name="password" component={ErrorText} />
@@ -356,20 +388,20 @@ const Signup = () => {
                   <Field name="phone">
                     {({ field, form }) => (
                       <PhoneInput
-                        country={'us'} // Default country
+                        country={"us"} // Default country
                         value={field.value}
-                        onChange={(value) => form.setFieldValue('phone', value)}
+                        onChange={(value) => form.setFieldValue("phone", value)}
                         inputStyle={{
-                          width: '100%',
-                          height: '44px',
-                          padding: '12px 12px 12px 50px',
-                          borderRadius: '8px',
-                          border: '1px solid #ccc',
-                          fontSize: '16px',
+                          width: "100%",
+                          height: "44px",
+                          padding: "12px 12px 12px 50px",
+                          borderRadius: "8px",
+                          border: "1px solid #ccc",
+                          fontSize: "16px",
                         }}
                         buttonStyle={{
-                          border: 'none',
-                          background: 'transparent',
+                          border: "none",
+                          background: "transparent",
                         }}
                       />
                     )}
@@ -384,18 +416,38 @@ const Signup = () => {
                     <option value="fitness">Fitness</option>
                     <option value="real_estate">Real Estate</option>
                     <option value="mortgage">Mortgage</option>
-                    <option value="coaching_consulting">Coaching & Consulting</option>
-                    <option value="solar_renewable_energy">Solar & Renewable Energy</option>
-                    <option value="ecommerce_retail">E-commerce & Retail</option>
-                    <option value="healthcare_wellness">Healthcare & Wellness</option>
-                    <option value="finance_insurance">Finance & Insurance</option>
-                    <option value="marketing_advertising">Marketing & Advertising</option>
-                    <option value="technology_software">Technology & Software</option>
-                    <option value="education_online_courses">Education & Online Courses</option>
+                    <option value="coaching_consulting">
+                      Coaching & Consulting
+                    </option>
+                    <option value="solar_renewable_energy">
+                      Solar & Renewable Energy
+                    </option>
+                    <option value="ecommerce_retail">
+                      E-commerce & Retail
+                    </option>
+                    <option value="healthcare_wellness">
+                      Healthcare & Wellness
+                    </option>
+                    <option value="finance_insurance">
+                      Finance & Insurance
+                    </option>
+                    <option value="marketing_advertising">
+                      Marketing & Advertising
+                    </option>
+                    <option value="technology_software">
+                      Technology & Software
+                    </option>
+                    <option value="education_online_courses">
+                      Education & Online Courses
+                    </option>
                     <option value="automotive">Automotive</option>
                     <option value="legal_services">Legal Services</option>
-                    <option value="construction_home_services">Construction & Home Services</option>
-                    <option value="hospitality_travel">Hospitality & Travel</option>
+                    <option value="construction_home_services">
+                      Construction & Home Services
+                    </option>
+                    <option value="hospitality_travel">
+                      Hospitality & Travel
+                    </option>
                     <option value="others">Other</option>
                   </Field>
                   <ErrorMessage name="industry" component={ErrorText} />
@@ -423,23 +475,26 @@ const Signup = () => {
                     <option value="linkedin">LinkedIn</option>
                     <option value="twitter_x">Twitter/X</option>
                     <option value="tiktok">TikTok</option>
-                    <option value="facebook_instagram">Facebook/Instagram</option>
+                    <option value="facebook_instagram">
+                      Facebook/Instagram
+                    </option>
                     <option value="webinar">Webinar/Live Event</option>
                     <option value="other">Other (Please Specify)</option>
                   </Field>
                   <ErrorMessage name="referralSource" component={ErrorText} />
                 </FormGroup>
               </CombinedFields>
-
-              <CheckboxContainer>
-                <Field type="checkbox" name="termsAccepted" />
-                <span>
-                  Yes, I agree to receive SMS updates and these{" "}
-                  <Link to="/">Terms of Service</Link> and{" "}
-                  <Link to="/">Privacy Policy</Link>.
-                </span>
-              </CheckboxContainer>
-              <ErrorMessage name="termsAccepted" component={ErrorText} />
+              <FormGroupDiff>
+                <CheckboxContainer>
+                  <Field type="checkbox" name="termsAccepted" />
+                  <span>
+                    Yes, I agree to receive SMS updates and these{" "}
+                    <Link to="/">Terms of Service</Link> and{" "}
+                    <Link to="/">Privacy Policy</Link>.
+                  </span>
+                </CheckboxContainer>
+                <ErrorMessage name="termsAccepted" component={ErrorText} />
+              </FormGroupDiff>
 
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? <Loader /> : "Create Free Account"}
@@ -451,13 +506,10 @@ const Signup = () => {
         <LinkText>
           Already have an account? <Link to="/">Sign in</Link>
         </LinkText>
-        <LinkText>
-          OR
-        </LinkText>
+        <LinkText>OR</LinkText>
         <GoogleLoginWrapper>
-        <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+          <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
         </GoogleLoginWrapper>
-
       </SignupBox>
     </Container>
   );

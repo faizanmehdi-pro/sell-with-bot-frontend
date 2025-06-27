@@ -19,6 +19,7 @@ const Container = styled.div`
   align-items: center;
   height: 100vh;
   background: #f9faff;
+  padding: 20px;
 `;
 
 const LoginBox = styled.div`
@@ -195,11 +196,12 @@ const Login = () => {
         navigate("/dashboard");
         
         login(response?.data?.token);
-        sessionStorage.setItem("user-ID", response?.data?.user_id)
-        sessionStorage.setItem("userName", response?.data?.full_name)
-        sessionStorage.setItem("firstName", response?.data?.first_name)
-        sessionStorage.setItem("lastName", response?.data?.last_name)
-        sessionStorage.setItem("online", response?.data?.online)
+        sessionStorage.setItem("user-ID", response?.data?.user_id);
+        sessionStorage.setItem("userName", response?.data?.full_name);
+        sessionStorage.setItem("firstName", response?.data?.first_name);
+        sessionStorage.setItem("lastName", response?.data?.last_name);
+        sessionStorage.setItem("online", response?.data?.online);
+        sessionStorage.setItem("botNumber", response?.data?.bot_number);
         queryClient.removeQueries({ queryKey: ["botDetails"] });
       } catch (error) {
         console.error("Login failed", error);
@@ -217,11 +219,12 @@ const Login = () => {
       login(data.token);
       navigate("/dashboard");
       toast.success("User Login Successfully!");
-      sessionStorage.setItem("user-ID", data?.user_id)
-      sessionStorage.setItem("userName", data?.full_name)
-      sessionStorage.setItem("firstName", data?.first_name)
-      sessionStorage.setItem("lastName", data?.last_name)
-      sessionStorage.setItem("online", data?.online)
+      sessionStorage.setItem("user-ID", data?.user_id);
+      sessionStorage.setItem("userName", data?.full_name);
+      sessionStorage.setItem("firstName", data?.first_name);
+      sessionStorage.setItem("lastName", data?.last_name);
+      sessionStorage.setItem("online", data?.online);
+      sessionStorage.setItem("botNumber", data?.bot_number);
       queryClient.removeQueries({ queryKey: ["botDetails"] });
     },
     onError: (error) => {

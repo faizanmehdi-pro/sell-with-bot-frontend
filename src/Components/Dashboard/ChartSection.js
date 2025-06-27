@@ -1,16 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { useQuery } from '@tanstack/react-query';
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useQuery } from "@tanstack/react-query";
 import {
-  format, startOfWeek, endOfWeek, startOfMonth,
-  endOfMonth, startOfYear, endOfYear,
-} from 'date-fns';
-import { fetchChatActivity } from '../../apis/WebHook/fetchChatActivity';
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from "date-fns";
+import { fetchChatActivity } from "../../apis/WebHook/fetchChatActivity";
 
 const Container = styled.div`
   display: flex;
@@ -18,10 +29,14 @@ const Container = styled.div`
   align-items: center;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 0px 10px 60px 0px #E2ECF980;
-  background: #FFFFFF;
+  box-shadow: 0px 10px 60px 0px #e2ecf980;
+  background: #ffffff;
   padding: 30px 20px;
   border-radius: 30px;
+
+  @media (max-width: 500px) {
+    padding: 30px 10px;
+  }
 `;
 
 const FilterButtons = styled.div`
@@ -40,8 +55,8 @@ const FilterButtons = styled.div`
 
     &.active,
     &:hover {
-      background: #3182CE;
-      color: #FFFFFF;
+      background: #3182ce;
+      color: #ffffff;
     }
   }
 `;
@@ -51,7 +66,7 @@ const DateRangeWrapperContainer = styled.div`
   justify-content: center;
   align-items: center;
   gap: 10px;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
   }
@@ -77,31 +92,28 @@ const DateRangeWrapper = styled.div`
     font-size: 16px;
     outline: none;
   }
-  
+
   @media (max-width: 500px) {
-  gap: 5px;
-  padding: 4px;
+    gap: 5px;
+    padding: 4px;
 
-  .react-datepicker-wrapper {
-    width: 90px;
-  }
+    .react-datepicker-wrapper {
+      width: 90px;
+    }
 
-  .react-datepicker__input-container input {
-    width: 100%;
-    padding: 8px 10px;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    outline: none;
-  }
+    .react-datepicker__input-container input {
+      width: 100%;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+    }
   }
 `;
 
 const ChartWrapper = styled.div`
-  background: #FFFFFF;
-  border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   width: 800px;
   margin: auto;
   height: 400px;
@@ -109,10 +121,20 @@ const ChartWrapper = styled.div`
   @media (max-width: 1250px) {
     width: 100%;
   }
-  
-  @media (max-width: 420px) {
+
+  @media (max-width: 500px) {
     padding: 10px 0;
+    margin: 0;
+    margin-left: 0;
   }
+`;
+
+const ListLoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
 `;
 
 const ListLoader = styled.div`
@@ -135,17 +157,17 @@ const ListLoader = styled.div`
 `;
 
 const EngagementChart = () => {
-  const [view, setView] = useState('Daily');
+  const [view, setView] = useState("Daily");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
   // Auto-adjust dates when view changes
   useEffect(() => {
     const now = new Date();
-    if (view === 'Daily') {
+    if (view === "Daily") {
       setStartDate(startOfWeek(now, { weekStartsOn: 1 }));
       setEndDate(endOfWeek(now, { weekStartsOn: 1 }));
-    } else if (view === 'Weekly') {
+    } else if (view === "Weekly") {
       setStartDate(startOfMonth(now));
       setEndDate(endOfMonth(now));
     } else {
@@ -155,10 +177,10 @@ const EngagementChart = () => {
   }, [view]);
 
   const handleStartDateChange = (date) => {
-    if (view === 'Daily') {
+    if (view === "Daily") {
       setStartDate(startOfWeek(date, { weekStartsOn: 1 }));
       setEndDate(endOfWeek(date, { weekStartsOn: 1 }));
-    } else if (view === 'Weekly') {
+    } else if (view === "Weekly") {
       setStartDate(startOfMonth(date));
       setEndDate(endOfMonth(date));
     } else {
@@ -167,29 +189,30 @@ const EngagementChart = () => {
     }
   };
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['chat-activity', view, startDate, endDate],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["chat-activity", view, startDate, endDate],
     queryFn: () =>
       fetchChatActivity({
         view,
-        start_date: format(startDate, 'yyyy-MM-dd'),
-        end_date: format(endDate, 'yyyy-MM-dd'),
+        start_date: format(startDate, "yyyy-MM-dd"),
+        end_date: format(endDate, "yyyy-MM-dd"),
       }),
     keepPreviousData: true,
   });
 
-  const chartData = data?.labels?.map((label, i) => ({
-    name: label,
-    value: data.data[i],
-  })) || [];
+  const chartData =
+    data?.labels?.map((label, i) => ({
+      name: label,
+      value: data.data[i],
+    })) || [];
 
   return (
     <Container>
       <FilterButtons>
-        {['Daily', 'Weekly', 'Monthly'].map((option) => (
+        {["Daily", "Weekly", "Monthly"].map((option) => (
           <button
             key={option}
-            className={view === option ? 'active' : ''}
+            className={view === option ? "active" : ""}
             onClick={() => setView(option)}
           >
             {option}
@@ -208,7 +231,7 @@ const EngagementChart = () => {
             endDate={endDate}
             dateFormat="MMM d, yyyy"
           />
-          {' — '}
+          {" — "}
           <DatePicker
             selected={endDate}
             onChange={(date) => setEndDate(date)}
@@ -222,27 +245,36 @@ const EngagementChart = () => {
       </DateRangeWrapperContainer>
 
       <ChartWrapper>
-        <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>
+        <h3 style={{ textAlign: "center", marginBottom: "10px" }}>
           {data?.title || `Chat Activity Overview (${view})`}
         </h3>
 
         {isLoading ? (
-          <ListLoader />
+          <ListLoaderContainer>
+            <ListLoader />
+          </ListLoaderContainer>
         ) : error ? (
-          <p style={{ textAlign: 'center', color: 'red' }}>Failed to load data</p>
+          <p style={{ textAlign: "center", color: "red" }}>
+            Failed to load data
+          </p>
         ) : (
           <>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
+              <BarChart data={chartData} margin={{ left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="value" fill="#f7941d" barSize={40} radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="value"
+                  fill="#f7941d"
+                  barSize={40}
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
-            <p style={{ textAlign: 'center', marginTop: '1rem' }}>
-              <span style={{ color: '#f7941d', marginRight: 8 }}>●</span>
+            <p style={{ textAlign: "center", marginTop: "1rem" }}>
+              <span style={{ color: "#f7941d", marginRight: 8 }}>●</span>
               Chat Activity Overview
             </p>
           </>

@@ -17,6 +17,10 @@ const CardContainer = styled.div`
   padding: 100px 30px 50px 30px;
   box-shadow: 0px 10px 60px 0px #E2ECF980;
   border-radius: 30px;
+  
+  @media (max-width: 768px) {
+    padding: 50px 20px;
+  }
 `;
 
 const Header = styled.div`
@@ -64,6 +68,11 @@ const SearchBarContainer = styled.div`
   gap: 10px;
   width: 100%;
   margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    gap: 15px;
+  }
 `;
 
 const SearchBar = styled.div`
@@ -82,6 +91,10 @@ const SearchInput = styled.input`
   font-size: 14px;
   margin-right: 10px;
   padding-left: 30px;  // Space for the search icon
+  
+  @media (max-width: 768px) {
+    margin: 0;
+  }
 `;
 
 const SearchIcon = styled(FiSearch)`
@@ -190,6 +203,11 @@ const AddButton = styled(Link)`
 
   &:hover {
     background: ${(props) => (props.disabled ? "#ccc" : "#007bff")};
+  }
+  
+  @media (max-width: 768px) {
+    margin-top: 20px;
+    width: 100%;
   }
 `;
 

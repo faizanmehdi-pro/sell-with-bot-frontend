@@ -17,14 +17,14 @@ import logo from "../../assets/images/Logo.png";
 import bgImage from "../../assets/body/Background.png";
 import HomeIcon from "../../assets/sidebarIcons/home.png";
 import HomeIconA from "../../assets/sidebarIcons/homeA.png";
-import ChartIcon from "../../assets/sidebarIcons/chart.png";
-import ChartIconA from "../../assets/sidebarIcons/chartA.png";
+// import ChartIcon from "../../assets/sidebarIcons/chart.png";
+// import ChartIconA from "../../assets/sidebarIcons/chartA.png";
 import BillingIcon from "../../assets/sidebarIcons/billing.png";
 import UsersIcon from "../../assets/sidebarIcons/users.png";
 import BillingIconA from "../../assets/sidebarIcons/billingA.png";
 import UsersIconA from "../../assets/sidebarIcons/usersA.png";
-import SettingIcon from "../../assets/topbarIcons/setting.png";
-import BellIcon from "../../assets/topbarIcons/bell.png";
+// import SettingIcon from "../../assets/topbarIcons/setting.png";
+// import BellIcon from "../../assets/topbarIcons/bell.png";
 import BotConversations from "../../assets/sidebarIcons/botConversations.png";
 import BotConversationsA from "../../assets/sidebarIcons/botConversationsA.png";
 import CreateUpdate from "../../assets/sidebarIcons/createUpdate.png";
@@ -33,8 +33,8 @@ import TestBot from "../../assets/sidebarIcons/test.png";
 import TestBotA from "../../assets/sidebarIcons/TestA.png";
 import IntegrationIcon from "../../assets/sidebarIcons/integrations.png";
 import IntegrationIconA from "../../assets/sidebarIcons/IntegrationsA.png";
-import { useQuery } from "@tanstack/react-query";
-import { getDashboaedData } from "../../apis/getDashboaedData";
+// import { useQuery } from "@tanstack/react-query";
+// import { getDashboaedData } from "../../apis/getDashboaedData";
 import { FiChevronDown, FiChevronUp, FiLogOut } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { logoutUser } from "../../apis/AuthForm/logout";
@@ -73,12 +73,12 @@ function MainDrawer() {
   const lastName = sessionStorage.getItem("lastName") || "";
   const initials = `${firstName[0] || ""}${lastName[0] || ""}`;
 
-  const { data } = useQuery({
-    queryKey: ["cardData"],
-    queryFn: getDashboaedData,
-  });
+  // const { data } = useQuery({
+  //   queryKey: ["cardData"],
+  //   queryFn: getDashboaedData,
+  // });
 
-  const currentBotNumber = data?.current_bot_number ?? "Bot-000";
+  // const currentBotNumber = data?.current_bot_number || sessionStorage.getItem("botNumber") || "";
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -102,7 +102,6 @@ function MainDrawer() {
       setIsLoggingOut(false);
     }
   };
-  
 
   const profileRef = React.useRef(null);
 
@@ -125,9 +124,9 @@ function MainDrawer() {
         <img src={logo} alt="SellWithBot" />
       </LogoContainer>
       <LogoDivider />
-      <BotNumber>{currentBotNumber}</BotNumber>
+      <BotNumber>{sessionStorage.getItem("botNumber") || ""}</BotNumber>
       <List>
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/dashboard" ? (
             <ActiveItem component={Link} to="/dashboard">
               <ActiveItemIcon>
@@ -145,7 +144,7 @@ function MainDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/bot-conversations" ? (
             <ActiveItem component={Link} to="/bot-conversations">
               <ActiveItemIcon>
@@ -163,7 +162,7 @@ function MainDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/create/modify-bot" ? (
             <ActiveItem component={Link} to="/create/modify-bot">
               <ActiveItemIcon>
@@ -181,7 +180,7 @@ function MainDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/test-bot" ? (
             <ActiveItem component={Link} to="/test-bot">
               <ActiveItemIcon>
@@ -199,7 +198,7 @@ function MainDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/integrations" ? (
             <ActiveItem component={Link} to="/integrations">
               <ActiveItemIcon>
@@ -217,7 +216,7 @@ function MainDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/billing" ? (
             <ActiveItem component={Link} to="/billing">
               <ActiveItemIcon>
@@ -235,7 +234,7 @@ function MainDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/users" ? (
             <ActiveItem component={Link} to="/users">
               <ActiveItemIcon>
@@ -337,15 +336,15 @@ function MainDrawer() {
                   </div>
                 </ProfileInfo>
                 <LogoutButton onClick={handleLogout} disabled={isLoggingOut}>
-  {isLoggingOut ? (
-    <ListLoader />
-  ) : (
-    <>
-      <FiLogOut style={{ marginRight: "8px" }} />
-      Log out
-    </>
-  )}
-</LogoutButton>
+                  {isLoggingOut ? (
+                    <ListLoader />
+                  ) : (
+                    <>
+                      <FiLogOut style={{ marginRight: "8px" }} />
+                      Log out
+                    </>
+                  )}
+                </LogoutButton>
               </DropdownMenu>
             )}
           </ProfileWrapper>

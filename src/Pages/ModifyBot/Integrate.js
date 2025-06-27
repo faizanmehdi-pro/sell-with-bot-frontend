@@ -14,6 +14,10 @@ const CardContainer = styled.div`
   align-items: center;
   gap: 20px;
   padding: 30px;
+  
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 const Integrate = () => {

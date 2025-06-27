@@ -7,18 +7,17 @@ const PageWrapper = styled.div`
   justify-content: center;
   align-items: center;
   background: #FFFFFF;
-  padding: 30px;
+  padding: 20px;
   box-shadow: 0px 10px 60px 0px #E2ECF980;
   max-width: 610px;
   border-radius: 30px;
   margin: auto;
-
 `;
 
 const Card = styled.div`
   width: 100%;
   max-width: 550px;
-  min-height: calc(100vh - 115px);
+  min-height: calc(100vh - 140px);
   border: 1px solid #ccc;
   border-radius: 16px;
   background: white;
@@ -87,7 +86,7 @@ const ChatBody = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: calc(100vh - 230px);
+  max-height: calc(100vh - 255px);
 
   /* Hide scrollbar for Webkit browsers (Chrome, Safari) */
   &::-webkit-scrollbar {
@@ -112,6 +111,10 @@ const Message = styled.div`
   font-size: 16px;
   color: #3182CE;
   font-weight: 600;
+  
+  @media (max-width: 768px) {
+    max-width: 90%;
+  }
 `;
 
 const bounce = keyframes`
@@ -142,6 +145,7 @@ const Dot = styled.span`
 
 const InputSection = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
   border: 1px solid #3182CE;
   border-radius: 8px;
@@ -151,7 +155,7 @@ const InputSection = styled.div`
 `;
 
 const Input = styled.input`
-  flex: 1;
+  width: 100%;
   padding: 10px 12px;
   border: none;
   border-radius: 16px;

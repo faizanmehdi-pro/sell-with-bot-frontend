@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
-// import { loginUser } from "../../apis/AuthForm/login";
-// import { useMutation } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import logo from "../../../assets/images/Logo.png";
 import { useAgencyAuth } from "./AuthContext";
+import { useMutation } from "@tanstack/react-query";
+import { loginAgencyUser } from "../../../apis/Agency/Auth/loginAgencyUser";
 
 const Container = styled.div`
   display: flex;
@@ -36,16 +36,6 @@ const LoginBox = styled.div`
     width: 90%;
   }
 `;
-
-// const Heading = styled.h1`
-//   font-size: 32px;
-//   font-weight: bold;
-//   color: #3182CE;
-//   text-transform: uppercase;
-//   letter-spacing: 2px;
-//   text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
-//   margin-bottom: 20px;
-// `;
 
 const StyledForm = styled(Form)`
   display: flex;
@@ -155,6 +145,22 @@ export const Loader = styled.div`
   }
 `;
 
+const LinkText = styled.p`
+  font-size: 14px;
+  color: #555;
+  margin-top: 10px;
+
+  a {
+    color: #3182CE;
+    text-decoration: none;
+    font-weight: bold;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
 // Yup validation schema
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -168,24 +174,21 @@ const LoginAgencyForm = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-  // const mutation = useMutation({
-  //   mutationFn: loginUser,
-  //   onSuccess: (data) => {
-  //     login(data.token);
-  //     navigate("/dashboard");
-  //     toast.success("User Login Successfully!");
-  //     sessionStorage.setItem("user-ID", data.user_id)
-  //   },
-  //   onError: (error) => {
-  //     toast.error(error.message);
-  //   },
-  // });
-
-  const handleLogin = () => {
-    login("fakeToken");
-    navigate("/agency-dashboard");
-    toast.success("User Login Successfully!");
-  };
+  const mutation = useMutation({
+    mutationFn: loginAgencyUser,
+    onSuccess: (data) => {
+      login(data.token);
+      navigate("/agency-dashboard");
+      toast.success("User Login Successfully!");
+      sessionStorage.setItem("userNameAgency", data?.full_name);
+      sessionStorage.setItem("firstNameAgency", data?.first_name);
+      sessionStorage.setItem("lastNameAgency", data?.last_name);
+      sessionStorage.setItem("onlineAgency", data?.online);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   return (
     <Container>
@@ -195,7 +198,7 @@ const LoginAgencyForm = () => {
         <Formik
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchema}
-          // onSubmit={(values) => mutation.mutate(values)}
+          onSubmit={(values) => mutation.mutate(values)}
         >
           {({ isSubmitting }) => (
             <StyledForm>
@@ -233,16 +236,15 @@ const LoginAgencyForm = () => {
                 <ErrorMessage name="password" component={ErrorText} />
               </FormGroup>
 
-              {/* <Button type="submit" disabled={mutation.isPending}>
+              <Button type="submit" disabled={mutation.isPending}>
                 {mutation.isPending ? <Loader /> : "Sign In"}
-              </Button> */}
-
-              <Button type="submit" onClick={handleLogin}>
-                Sign In
               </Button>
             </StyledForm>
           )}
         </Formik>
+                <LinkText>
+                  Don't have an account? <Link to="/agency-sign-up">Sign up</Link>
+                </LinkText>
       </LoginBox>
     </Container>
   );

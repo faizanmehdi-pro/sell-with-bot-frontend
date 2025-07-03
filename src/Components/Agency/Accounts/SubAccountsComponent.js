@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import {
-  FaRegEdit,
+  // FaRegEdit,
   FaRegTrashAlt,
   FaArrowRight,
   FaChevronDown,
@@ -16,6 +16,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import bar from "../../../assets/SuperAdmin/accounts/bar.png";
 import CreateSubAccount from "./CreateSubAccount";
 import DeleteSubAccountModal from "./DeleteSubAccount";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getAgencySubAccountsList } from "../../../apis/Agency/Accounts/getAgencySubAccountsList";
+import { toast } from "react-toastify";
+import { switchToAgencyAccount } from "../../../apis/Agency/Accounts/switchToAgencyAccount";
+import { useAuth } from "../../Auth/AuthContext";
 
 const Container = styled.div`
   display: flex;
@@ -223,6 +228,7 @@ const Card = styled.div`
 
 const CardTop = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: start;
   padding: 20px;
 `;
@@ -325,10 +331,9 @@ const IconGroup = styled.button`
   background: none;
   outline: none;
   cursor: pointer;
-  position: absolute;
-  right: 20px;
 
-  @media (max-width: 420px) {
+  @media (max-width: 500px) {
+    position: absolute;
     left: 15px;
     bottom: 10px;
     gap: 10px;
@@ -384,20 +389,33 @@ const TabButton = styled.button`
   &:hover {
     color: #3182ce;
   }
-  
+
   @media (max-width: 420px) {
     padding: 10px 5px;
   }
 `;
 
-const SubAccountComponent = () => {
-  const accounts = Array(6).fill({
-    clientName: "Akshay Syal",
-    botId: "09898989898",
-    chats: 100,
-    tokenUsage: "31.03%",
-  });
+const ListLoader = styled.div`
+  border: 4px solid #3182ce;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
 
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const SubAccountComponent = () => {
+  const { login } = useAuth();
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [showSortBy, setShowSortBy] = useState(false);
@@ -407,12 +425,44 @@ const SubAccountComponent = () => {
   const [tab, setTab] = useState("list");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [activeSwitchId, setActiveSwitchId] = useState(null);
 
-  
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["agency-sub-accounts"],
+    queryFn: () => getAgencySubAccountsList(),
+    keepPreviousData: true,
+  });
+
   const handleDelete = (user) => {
     setSelectedUser(user);
     setShowDeleteModal(true);
   };
+
+  const switchMutation = useMutation({
+    mutationFn: (userId) => switchToAgencyAccount(userId),
+    onMutate: (userId) => {
+      setActiveSwitchId(userId); // show loader for the selected ID
+    },
+    onSuccess: (resp) => {
+      sessionStorage.setItem("authToken", resp?.user_token);
+      sessionStorage.setItem("userName", resp?.full_name);
+      sessionStorage.setItem("firstName", resp?.first_name);
+      sessionStorage.setItem("lastName", resp?.last_name);
+      sessionStorage.setItem("online", resp?.online);
+      sessionStorage.setItem("botNumber", resp?.bot_number);
+      sessionStorage.setItem("switchedSubAccount", "true");
+      login(resp?.user_token);
+      // window.open("http://localhost:3000/dashboard", "_self");
+      // navigate("/dashboard");
+      window.open(resp?.url_data, "_self");
+    },
+    onError: () => {
+      toast.error("Failed to Switch Sub-Account");
+    },
+    onSettled: () => {
+      setActiveSwitchId(null); // reset loader
+    },
+  });
 
   return (
     <Container>
@@ -483,78 +533,100 @@ const SubAccountComponent = () => {
       </Header>
 
       <Main>
-    <Tabs>
-      <TabButton active={tab === "list"} onClick={() => setTab("list")}>
-        Sub-Accounts
-      </TabButton>
-      <TabButton active={tab === "create"} onClick={() => setTab("create")}>
-        Create Sub-Account
-      </TabButton>
-    </Tabs>
-    {tab === "list" ? (
-        <CardGrid>
-          {accounts.map((account, index) => (
-            <Card key={index}>
-              <CardTop>
-                <CardTopLeft>
-                  <Label>Client name : {account.clientName}</Label>
-                  <InfoLine>
-                    Bot ID : <span>{account.botId}</span>
-                  </InfoLine>
-                  <CardTopCenter>
-                    <CardTopCenterInfo>
-                      <CardTopCenterInfoHeading>
-                        Number of chats
-                      </CardTopCenterInfoHeading>
-                      <CardTopCenterInfoLeftContainer>
-                        <CardTopCenterInfoLeft>
-                          <MdOutlineMarkChatUnread />
-                          {account.chats}
-                        </CardTopCenterInfoLeft>
-                        <CardTopCenterInfoRight>
-                          <FaArrowDown />
-                          {account.tokenUsage}
-                        </CardTopCenterInfoRight>
-                      </CardTopCenterInfoLeftContainer>
-                    </CardTopCenterInfo>
-                    <CardTopCenterInfo>
-                      <CardTopCenterInfoHeading>
-                        Usage of token
-                      </CardTopCenterInfoHeading>
-                      <CardTopCenterInfoLeftContainer>
-                        <CardTopCenterInfoLeft>
-                          <img src={bar} alt="icon" />
-                          {account.chats}
-                        </CardTopCenterInfoLeft>
-                        <CardTopCenterInfoRight>
-                          <FaArrowDown />
-                          {account.tokenUsage}
-                        </CardTopCenterInfoRight>
-                      </CardTopCenterInfoLeftContainer>
-                    </CardTopCenterInfo>
-                  </CardTopCenter>
-                </CardTopLeft>
-                <IconGroup onClick={() => handleDelete(account)}>
-                  <FaRegTrashAlt fontSize={19} />
-                </IconGroup>
-              </CardTop>
-              <CardBottom>
-                <SwitchButton>
-                  <TbArrowsRightLeft fontSize={20} /> Switch to Sub-Account
-                </SwitchButton>
-              </CardBottom>
-            </Card>
-          ))}
-        </CardGrid>
-      ) : (
-        <CreateSubAccount />
-      )}
+        <Tabs>
+          <TabButton active={tab === "list"} onClick={() => setTab("list")}>
+            Sub-Accounts
+          </TabButton>
+          <TabButton active={tab === "create"} onClick={() => setTab("create")}>
+            Create Sub-Account
+          </TabButton>
+        </Tabs>
+        {tab === "list" ? (
+          <CardGrid>
+            {isLoading ? (
+              <ListLoader />
+            ) : isError ? (
+              <p>Error Fetching Sub Accounts</p>
+            ) : (
+              data?.results?.map((account, index) => (
+                <Card key={index}>
+                  <CardTop>
+                    <CardTopLeft>
+                      <Label>Client name : {account.full_name}</Label>
+                      <InfoLine>
+                        Bot ID : <span>{account.bot_number || "N/A"}</span>
+                      </InfoLine>
+                      <CardTopCenter>
+                        <CardTopCenterInfo>
+                          <CardTopCenterInfoHeading>
+                            Number of chats
+                          </CardTopCenterInfoHeading>
+                          <CardTopCenterInfoLeftContainer>
+                            <CardTopCenterInfoLeft>
+                              <MdOutlineMarkChatUnread />
+                              {account.chat_count}
+                            </CardTopCenterInfoLeft>
+                            <CardTopCenterInfoRight>
+                              <FaArrowDown />
+                              {account.monthly_chat_percentage}
+                            </CardTopCenterInfoRight>
+                          </CardTopCenterInfoLeftContainer>
+                        </CardTopCenterInfo>
+                        <CardTopCenterInfo>
+                          <CardTopCenterInfoHeading>
+                            Usage of token
+                          </CardTopCenterInfoHeading>
+                          <CardTopCenterInfoLeftContainer>
+                            <CardTopCenterInfoLeft>
+                              <img src={bar} alt="icon" />
+                              {account.token_used}
+                            </CardTopCenterInfoLeft>
+                            <CardTopCenterInfoRight>
+                              <FaArrowDown />
+                              {account.monthly_token_percentage}
+                            </CardTopCenterInfoRight>
+                          </CardTopCenterInfoLeftContainer>
+                        </CardTopCenterInfo>
+                      </CardTopCenter>
+                    </CardTopLeft>
+                    <IconGroup onClick={() => handleDelete(account)}>
+                      <FaRegTrashAlt fontSize={19} />
+                    </IconGroup>
+                  </CardTop>
+                  <CardBottom>
+                    <SwitchButton
+                      onClick={() => switchMutation.mutate(account.id)}
+                      disabled={activeSwitchId === account.id}
+                    >
+                      {activeSwitchId === account.id ? (
+                        <ListLoader
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            borderWidth: "2px",
+                          }}
+                        />
+                      ) : (
+                        <>
+                          <TbArrowsRightLeft fontSize={20} /> Switch to
+                          Sub-Account
+                        </>
+                      )}
+                    </SwitchButton>
+                  </CardBottom>
+                </Card>
+              ))
+            )}
+          </CardGrid>
+        ) : (
+          <CreateSubAccount setTab={setTab} />
+        )}
       </Main>
-        <DeleteSubAccountModal
-          isOpen={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          user={selectedUser}
-        />
+      <DeleteSubAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        user={selectedUser}
+      />
     </Container>
   );
 };

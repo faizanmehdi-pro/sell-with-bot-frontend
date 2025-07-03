@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -23,10 +23,11 @@ import BillingIcon from "../../../assets/SuperAdmin/sidebarIcons/billing.png";
 import UsersIcon from "../../../assets/SuperAdmin/sidebarIcons/users.png";
 import BillingIconA from "../../../assets/SuperAdmin/sidebarIcons/billingA.png";
 import UsersIconA from "../../../assets/SuperAdmin/sidebarIcons/usersA.png";
-import SettingIcon from "../../../assets/SuperAdmin/topbarIcons/setting.png";
-import BellIcon from "../../../assets/SuperAdmin/topbarIcons/bell.png";
 import IntegrateIcon from "../../../assets/SuperAdmin/integrate/integrate.png";
 import IntegrateIconA from "../../../assets/SuperAdmin/integrate/integrateA.png";
+import { toast } from "react-toastify";
+import { FiChevronDown, FiChevronUp, FiLogOut } from "react-icons/fi";
+import { logoutAgencyUser } from "../../../apis/Agency/Auth/logoutAgencyUser";
 
 const drawerWidth = 265;
 
@@ -40,21 +41,66 @@ const getTitleFromPath = (path) => {
       return "Billing & Invoices";
     case "/agency-users":
       return "Users";
-      case "/agency-integrate":
-        return "Integrate";
+    case "/agency-integrate":
+      return "Integrate";
     default:
       return "Page";
   }
 };
 
 function AgencyDrawer() {
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
+  const firstName = sessionStorage.getItem("firstNameAgency") || "";
+  const lastName = sessionStorage.getItem("lastNameAgency") || "";
+  const initials = `${firstName[0] || ""}${lastName[0] || ""}`;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  const handleProfileMenuToggle = () => {
+    setIsProfileMenuOpen((prev) => !prev);
+  };
+
+  const handleLogout = async () => {
+    sessionStorage.clear();
+    navigate("/agency");
+  };
+
+  // const handleLogout = async () => {
+  //   setIsLoggingOut(true);
+  //   try {
+  //     await logoutAgencyUser(); // API call
+  //     toast.success("User Logged Out Successfully!");
+  //     sessionStorage.clear();
+  //     navigate("/agency");
+  //   } catch (error) {
+  //     toast.error("Logout Failed. Please try again.");
+  //     setIsLoggingOut(false);
+  //   } finally {
+  //     setIsLoggingOut(false);
+  //   }
+  // };
+
+  const profileRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const drawer = (
     <StyledDrawerContainer>
@@ -134,7 +180,7 @@ function AgencyDrawer() {
             </InactiveItem>
           )}
         </ListItem>
-        
+
         <ListItem disablePadding>
           {currentPath === "/agency-integrate" ? (
             <ActiveItem component={Link} to="/agency-integrate">
@@ -167,7 +213,7 @@ function AgencyDrawer() {
           "@media (max-width: 990px)": {
             width: "100%",
             ml: 0,
-            mt: 0
+            mt: 0,
           },
           background: "none",
           boxShadow: "none",
@@ -208,8 +254,48 @@ function AgencyDrawer() {
           </Box>
 
           <Box sx={{ display: "flex", gap: 2, pr: 2 }}>
-            <img src={SettingIcon} alt="Icon" />
-            <img src={BellIcon} alt="Icon" />
+            <ProfileWrapper ref={profileRef}>
+              <AvatarButton onClick={handleProfileMenuToggle}>
+                <InitialsCircle>{initials.toUpperCase() || "U"}</InitialsCircle>
+                {isProfileMenuOpen ? (
+                  <FiChevronUp size={19} color="#fff" />
+                ) : (
+                  <FiChevronDown size={19} color="#fff" />
+                )}
+              </AvatarButton>
+
+              {isProfileMenuOpen && (
+                <DropdownMenu>
+                  <ProfileInfo>
+                    <AvatarCircle>{initials.toUpperCase() || "U"}</AvatarCircle>
+                    <div>
+                      <NameText>
+                        {sessionStorage.getItem("firstNameAgency") +
+                          sessionStorage.getItem("lastNameAgency") ||
+                          sessionStorage.getItem("userNameAgency") ||
+                          "User"}
+                      </NameText>
+                      <StatusText>
+                        ●{" "}
+                        {sessionStorage.getItem("onlineAgency") === "true"
+                          ? "Online"
+                          : "Offline"}
+                      </StatusText>
+                    </div>
+                  </ProfileInfo>
+                  <LogoutButton onClick={handleLogout} disabled={isLoggingOut}>
+                    {isLoggingOut ? (
+                      <ListLoader />
+                    ) : (
+                      <>
+                        <FiLogOut style={{ marginRight: "8px" }} />
+                        Log out
+                      </>
+                    )}
+                  </LogoutButton>
+                </DropdownMenu>
+              )}
+            </ProfileWrapper>
           </Box>
         </Toolbar>
       </AppBar>
@@ -335,6 +421,13 @@ const ActiveItem = styled(ListItemButton)`
     font-weight: 700;
     font-family: "Mulish";
   }
+
+  .css-fyswvn {
+    color: #2d3748;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Mulish";
+  }
 `;
 
 const InactiveItem = styled(ListItemButton)`
@@ -343,6 +436,13 @@ const InactiveItem = styled(ListItemButton)`
   gap: 10px;
 
   .css-rizt0-MuiTypography-root {
+    color: #a0aec0;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Mulish";
+  }
+
+  .css-fyswvn {
     color: #a0aec0;
     font-size: 12px;
     font-weight: 700;
@@ -382,5 +482,112 @@ const MainWrapper = styled.div`
 
   @media (max-width: 990px) {
     flex-direction: column;
+  }
+`;
+
+const ProfileWrapper = styled.div`
+  position: relative;
+  margin-right: 20px;
+`;
+
+const AvatarButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+`;
+
+const InitialsCircle = styled.div`
+  width: 32px;
+  height: 32px;
+  background-color: #ffffff;
+  color: #3182ce;
+  border-radius: 50%;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-family: "Mulish";
+`;
+
+const DropdownMenu = styled.div`
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background: #ffffff;
+  box-shadow: 0px 5px 14px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  width: 250px;
+  z-index: 1000;
+  padding: 12px;
+`;
+
+const ProfileInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 10px;
+`;
+
+const AvatarCircle = styled(InitialsCircle)`
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  background-color: #3182ce;
+  color: #ffffff;
+`;
+
+const NameText = styled.div`
+  font-weight: bold;
+  color: #2d3748;
+  font-size: 14px;
+`;
+
+const StatusText = styled.div`
+  font-size: 12px;
+  color: green;
+`;
+
+const LogoutButton = styled.button`
+  width: 100%;
+  background: none;
+  border: none;
+  color: #2d3748;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  padding: 8px 0;
+  font-family: "Mulish";
+  display: flex;
+  align-items: center;
+  padding: 12px 0 5px 5px;
+
+  &:hover {
+    color: #3182ce;
+  }
+`;
+
+const ListLoader = styled.div`
+  border: 4px solid #3182ce;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;

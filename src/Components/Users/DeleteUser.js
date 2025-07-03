@@ -1,14 +1,14 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
-import { toast } from 'react-toastify';
-import styled from 'styled-components';
-import { deleteDashboardUser } from '../../apis/Users/deleteDashboardUser';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
+import styled from "styled-components";
+import { deleteDashboardUser } from "../../apis/Users/deleteDashboardUser";
 
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  display: ${({ isOpen }) => (isOpen ? 'flex' : 'none')};
+  display: ${({ isOpen }) => (isOpen ? "flex" : "none")};
   align-items: center;
   justify-content: center;
   z-index: 2000;
@@ -21,7 +21,7 @@ const Modal = styled.div`
   width: 100%;
   max-width: 400px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  
+
   @media (max-width: 420px) {
     margin: 0 10px;
     padding: 30px 20px;
@@ -48,7 +48,7 @@ const Actions = styled.div`
 `;
 
 const Button = styled.button`
-    width: 100px;
+  width: 100px;
   height: 40px;
   border-radius: 8px;
   font-size: 14px;
@@ -64,7 +64,7 @@ const CancelButton = styled(Button)`
 
 const DeleteButton = styled(Button)`
   background-color: #3182ce;
-  color: #FFFFFF;
+  color: #ffffff;
 `;
 
 const Loader = styled.div`
@@ -77,8 +77,12 @@ const Loader = styled.div`
   display: inline-block;
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -89,12 +93,12 @@ const DeleteUserModal = ({ isOpen, onClose, user }) => {
   const mutation = useMutation({
     mutationFn: deleteDashboardUser,
     onSuccess: (data) => {
-      toast.success(data.message || 'User deleted successfully!');
-      queryClient.invalidateQueries(['dashboard-users']);
+      toast.success(data.message || "User deleted successfully!");
+      queryClient.invalidateQueries(["dashboard-users"]);
       onClose();
     },
     onError: (error) => {
-      toast.error(error.message || 'Something went wrong');
+      toast.error(error.message || "Something went wrong");
     },
   });
 
@@ -112,11 +116,13 @@ const DeleteUserModal = ({ isOpen, onClose, user }) => {
     <Overlay isOpen={isOpen}>
       <Modal>
         <Title>Confirm Deletion</Title>
-        <Message>Are you sure you want to delete <strong>{user?.full_name}</strong>?</Message>
+        <Message>
+          Are you sure you want to delete <strong>{user?.full_name}</strong>?
+        </Message>
         <Actions>
           <CancelButton onClick={onClose}>Cancel</CancelButton>
           <DeleteButton onClick={handleDelete} disabled={loading}>
-            {loading ? <Loader /> : 'Delete'}
+            {loading ? <Loader /> : "Delete"}
           </DeleteButton>
         </Actions>
       </Modal>

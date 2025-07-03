@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import {
-  FaRegEdit,
+  // FaRegEdit,
   FaRegTrashAlt,
   FaArrowRight,
   FaChevronDown,
@@ -248,6 +248,7 @@ const Card = styled.div`
 
 const CardTop = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: start;
   padding: 20px;
 `;
@@ -348,10 +349,9 @@ const IconGroup = styled.div`
   gap: 15px;
   color: #828894;
   cursor: pointer;
-  position: absolute;
-  right: 20px;
 
-  @media (max-width: 420px) {
+  @media (max-width: 500px) {
+    position: absolute;
     left: 20px;
     bottom: 10px;
   }
@@ -423,20 +423,20 @@ const AccountComponent = () => {
       setActiveSwitchId(userId); // show loader for the selected ID
     },
     onSuccess: (resp) => {
-      toast.success("Switched account successfully");
       sessionStorage.setItem("authToken", resp?.user_token);
       sessionStorage.setItem("userName", resp?.full_name);
       sessionStorage.setItem("firstName", resp?.first_name);
       sessionStorage.setItem("lastName", resp?.last_name);
       sessionStorage.setItem("online", resp?.online);
       sessionStorage.setItem("botNumber", resp?.bot_number);
+      sessionStorage.setItem("switched", "true");
       login(resp?.user_token);
       // window.open("http://localhost:3000/dashboard", "_self");
       // navigate("/dashboard");
       window.open(resp?.url_data, "_self");
     },
     onError: () => {
-      toast.error("Failed to switch account");
+      toast.error("Failed to Switch Account");
     },
     onSettled: () => {
       setActiveSwitchId(null); // reset loader
@@ -561,7 +561,7 @@ const AccountComponent = () => {
                     </CardTopCenter>
                   </CardTopLeft>
                   <IconGroup>
-                    <FaRegEdit fontSize={20} />
+                    {/* <FaRegEdit fontSize={20} /> */}
                     <FaRegTrashAlt fontSize={19} />
                   </IconGroup>
                 </CardTop>

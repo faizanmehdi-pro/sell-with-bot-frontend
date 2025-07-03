@@ -73,6 +73,24 @@ function MainDrawer() {
   const lastName = sessionStorage.getItem("lastName") || "";
   const initials = `${firstName[0] || ""}${lastName[0] || ""}`;
 
+  React.useEffect(() => {
+    const switchedSub = sessionStorage.getItem("switchedSubAccount");
+    const switched = sessionStorage.getItem("switched");
+  
+    if (switchedSub === "true") {
+      toast.success("Switched to Sub-Account Successfully");
+      setTimeout(() => {
+        sessionStorage.removeItem("switchedSubAccount");
+      }, 3000); // 3-second delay before removing
+    } else if (switched === "true") {
+      toast.success("Switched to Account Successfully");
+      setTimeout(() => {
+        sessionStorage.removeItem("switched");
+      }, 3000);
+    }
+  }, []);
+  
+
   // const { data } = useQuery({
   //   queryKey: ["cardData"],
   //   queryFn: getDashboaedData,
@@ -472,6 +490,13 @@ const ActiveItem = styled(ListItemButton)`
     font-weight: 700;
     font-family: "Mulish";
   }
+  
+  .css-fyswvn {
+    color: #2d3748;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Mulish";
+  }
 `;
 
 const InactiveItem = styled(ListItemButton)`
@@ -480,6 +505,13 @@ const InactiveItem = styled(ListItemButton)`
   gap: 10px;
 
   .css-rizt0-MuiTypography-root {
+    color: #a0aec0;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Mulish";
+  }
+  
+  .css-fyswvn {
     color: #a0aec0;
     font-size: 12px;
     font-weight: 700;
@@ -539,6 +571,7 @@ const AvatarButton = styled.button`
   gap: 5px;
   background: transparent;
   border: none;
+  outline: none;
   cursor: pointer;
 `;
 

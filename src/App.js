@@ -38,6 +38,7 @@ import Billing from "./Pages/Billing/Billing";
 import AdminUsers from "./Pages/SuperAdmin/Users/Users";
 import Users from "./Pages/Users/Users";
 import BotConversation from "./Components/Dashboard/BotConversations";
+import SignupAgencyForm from "./Components/Agency/Auth/SignUpAgencyForm";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ function App() {
               <Route path="/super-admin" element={<LoginAdmin />} />
               
               <Route path="/agency" element={<LoginAgency />} />
+              <Route path="/agency-sign-up" element={<SignupAgencyForm />} />
 
               {/* Protected Routes wrapped in MainDrawer */}
               <Route element={<MainDrawer />}>

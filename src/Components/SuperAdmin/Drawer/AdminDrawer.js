@@ -145,7 +145,7 @@ function AdminDrawer() {
           "@media (max-width: 990px)": {
             width: "100%",
             ml: 0,
-            mt: 0
+            mt: 0,
           },
           background: "none",
           boxShadow: "none",
@@ -313,6 +313,13 @@ const ActiveItem = styled(ListItemButton)`
     font-weight: 700;
     font-family: "Mulish";
   }
+
+  .css-fyswvn {
+    color: #2d3748;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Mulish";
+  }
 `;
 
 const InactiveItem = styled(ListItemButton)`
@@ -321,6 +328,13 @@ const InactiveItem = styled(ListItemButton)`
   gap: 10px;
 
   .css-rizt0-MuiTypography-root {
+    color: #a0aec0;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Mulish";
+  }
+
+  .css-fyswvn {
     color: #a0aec0;
     font-size: 12px;
     font-weight: 700;

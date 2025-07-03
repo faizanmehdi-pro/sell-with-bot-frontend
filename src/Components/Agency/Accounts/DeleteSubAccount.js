@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
+import { deleteAgencySubAccount } from "../../../apis/Agency/Accounts/deleteAgencySubAccount";
+import { toast } from "react-toastify";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Overlay = styled.div`
   position: fixed;
@@ -64,17 +67,59 @@ const DeleteButton = styled(Button)`
   color: #ffffff;
 `;
 
+const Loader = styled.div`
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
 const DeleteSubAccountModal = ({ isOpen, onClose, user }) => {
+    const queryClient = useQueryClient();
+    const [loading, setLoading] = useState(false);
+  
+    const mutation = useMutation({
+      mutationFn: deleteAgencySubAccount,
+      onSuccess: (data) => {
+        toast.success(data.message || 'Sub Account Deleted Successfully!');
+        queryClient.invalidateQueries(['agency-sub-accounts']);
+        onClose();
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Something went wrong'); 
+      },
+    });
+  
+    const handleDelete = () => {
+      if (!user?.id) return;
+      setLoading(true);
+      mutation.mutate(user.id, {
+        onSettled: () => {
+          setLoading(false);
+        },
+      });
+    };
+
   return (
     <Overlay isOpen={isOpen}>
       <Modal>
         <Title>Confirm Deletion</Title>
         <Message>
-          Are you sure you want to delete <strong>{user?.clientName}</strong>?
+          Are you sure you want to delete <strong>{user?.full_name}</strong>?
         </Message>
         <Actions>
           <CancelButton onClick={onClose}>Cancel</CancelButton>
-          <DeleteButton>Delete</DeleteButton>
+          <DeleteButton onClick={handleDelete} disabled={loading}>
+            {loading ? <Loader /> : 'Delete'}
+          </DeleteButton>
         </Actions>
       </Modal>
     </Overlay>

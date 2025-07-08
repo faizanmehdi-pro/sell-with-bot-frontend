@@ -39,6 +39,7 @@ import AdminUsers from "./Pages/SuperAdmin/Users/Users";
 import Users from "./Pages/Users/Users";
 import BotConversation from "./Components/Dashboard/BotConversations";
 import SignupAgencyForm from "./Components/Agency/Auth/SignUpAgencyForm";
+import VerifyOTPAgency from "./Components/Agency/Auth/VerifyOTPAgency";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ function App() {
               
               <Route path="/agency" element={<LoginAgency />} />
               <Route path="/agency-sign-up" element={<SignupAgencyForm />} />
+              <Route path="/verify-otp-agency" element={<VerifyOTPAgency />} />
 
               {/* Protected Routes wrapped in MainDrawer */}
               <Route element={<MainDrawer />}>

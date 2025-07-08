@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
-import { signupUser } from "../../../apis/AuthForm/signUp";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
@@ -12,6 +11,7 @@ import "react-phone-input-2/lib/style.css";
 import logo from "../../../assets/images/Logo.png";
 import Select from "react-select";
 import countryList from "react-select-country-list";
+import { SignUpAgencyUser } from "../../../apis/Agency/Auth/signUpAgency";
 
 const Container = styled.div`
   display: flex;
@@ -45,14 +45,6 @@ const SignupBox = styled.div`
   width: 100%;
 `;
 
-const SubText = styled.p`
-  font-size: 14px;
-  color: #4caf50;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: left;
-`;
-
 const StyledForm = styled(Form)`
   display: flex;
   flex-direction: column;
@@ -72,6 +64,7 @@ const FormGroupMulti = styled.div`
   text-align: left;
   position: relative;
   height: 180px;
+  margin-top: 5px;
 `;
 
 const FormGroupDiff = styled.div`
@@ -206,21 +199,38 @@ const CheckboxGroup = styled.div`
   flex-direction: column;
   gap: 8px;
   font-size: 14px;
+  margin-top: 5px;
 `;
 
 const validationSchema = Yup.object().shape({
   fullName: Yup.string().required("Full name is required"),
   agencyName: Yup.string().required("Agency name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
-  phone: Yup.string().required("Phone number is required"),
   password: Yup.string().min(6).required("Password is required"),
   country: Yup.string().required("Country is required"),
+  phone: Yup.string().required("Phone number is required"),
   teamSize: Yup.string().required("Team size is required"),
-  purpose: Yup.array().min(1, "Select at least one purpose"),
   chatbotUsed: Yup.string().required("Required"),
+  purpose: Yup.array().min(1, "Select at least one purpose"),
   preferredPlatform: Yup.array().min(1, "Select at least one platform"),
   termsAccepted: Yup.boolean().oneOf([true], "You must accept the terms"),
 });
+
+const useCaseOptions = [
+  { value: "sell_digital_products", label: "Sell my digital products" },
+  { value: "automate_dms_lead_gen", label: "Automate DMs & lead gen" },
+  { value: "close_deals", label: "Close deals on autopilot" },
+  { value: "run_client_campaigns", label: "Run client campaigns" },
+  { value: "resell_white_label", label: "Resell as white-label" },
+];
+
+const platformOptions = [
+  { value: "instagram", label: "Instagram" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "facebook", label: "Facebook" },
+  { value: "website", label: "Website" },
+  { value: "others", label: "Others" },
+];
 
 const SignupAgencyForm = () => {
   const navigate = useNavigate();
@@ -231,22 +241,24 @@ const SignupAgencyForm = () => {
       full_name: values.fullName,
       agency_name: values.agencyName,
       email: values.email,
-      phone_number: values.phone,
-      website: values.website || "",
-      country: values.country,
-      team_size: values.teamSize,
-      purpose: values.purpose,
-      chatbot_used: values.chatbotUsed,
-      preferred_platform: values.preferredPlatform,
       password: values.password,
-      referral_name: values.referralName || "",
+      country: values.country,
+      phone_number: values.phone,
+      team_size: values.teamSize,
+      used_chatbot_before: values.chatbotUsed,
+      website_or_social: values.website || "",
+      referral_code: values.referralName || "",
+      use_cases: values.purpose,
+      preferred_platforms: values.preferredPlatform,
       terms_accepted: values.termsAccepted,
     };
 
     try {
-      const res = await signupUser(payload);
+      const res = await SignUpAgencyUser(payload);
       toast.success(res.message || "Signup successful!");
-      navigate("/verify-otp", { state: { email: values.email } });
+      navigate("/verify-otp-agency", {
+        state: { email: values.email, otp: res?.OTP },
+      });
     } catch (err) {
       toast.error(err.message || "Something went wrong");
     } finally {
@@ -266,19 +278,19 @@ const SignupAgencyForm = () => {
             fullName: "",
             agencyName: "",
             email: "",
-            phone: "",
-            website: "",
-            country: "",
-            teamSize: "",
-            purpose: [],
-            chatbotUsed: "",
-            preferredPlatform: [],
             password: "",
+            country: "",
+            phone: "",
+            teamSize: "",
+            chatbotUsed: "",
+            website: "",
             referralName: "",
+            purpose: [],
+            preferredPlatform: [],
             termsAccepted: false,
           }}
-          // validationSchema={validationSchema}
-          // onSubmit={handleSubmit}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
         >
           {({ isSubmitting, setFieldValue, values }) => (
             <StyledForm>
@@ -317,29 +329,26 @@ const SignupAgencyForm = () => {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>Phone Number *</Label>
-                  <Field name="phone">
-                    {({ field, form }) => (
-                      <PhoneInput
-                        country={"us"}
-                        value={field.value}
-                        onChange={(value) => form.setFieldValue("phone", value)}
-                        inputStyle={{
-                          width: "100%",
-                          height: "44px",
-                          padding: "12px 12px 12px 50px",
-                          borderRadius: "8px",
-                          border: "1px solid #ccc",
-                          fontSize: "16px",
-                        }}
-                        buttonStyle={{
-                          border: "none",
-                          background: "transparent",
-                        }}
-                      />
-                    )}
-                  </Field>
-                  <ErrorMessage name="phone" component={ErrorText} />
+                  <Label>Create a Password *</Label>
+                  <PasswordWrapper>
+                    <Field
+                      as={PasswordInput}
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter a password"
+                    />
+                    <EyeButton
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <AiOutlineEyeInvisible />
+                      ) : (
+                        <AiOutlineEye />
+                      )}
+                    </EyeButton>
+                  </PasswordWrapper>
+                  <ErrorMessage name="password" component={ErrorText} />
                 </FormGroup>
               </CombinedFields>
 
@@ -379,14 +388,42 @@ const SignupAgencyForm = () => {
                 </FormGroup>
 
                 <FormGroup>
+                  <Label>Phone Number *</Label>
+                  <Field name="phone">
+                    {({ field, form }) => (
+                      <PhoneInput
+                        country={"us"}
+                        value={field.value}
+                        onChange={(value) => form.setFieldValue("phone", value)}
+                        inputStyle={{
+                          width: "100%",
+                          height: "44px",
+                          padding: "12px 12px 12px 50px",
+                          borderRadius: "8px",
+                          border: "1px solid #ccc",
+                          fontSize: "16px",
+                        }}
+                        buttonStyle={{
+                          border: "none",
+                          background: "transparent",
+                        }}
+                      />
+                    )}
+                  </Field>
+                  <ErrorMessage name="phone" component={ErrorText} />
+                </FormGroup>
+              </CombinedFields>
+
+              <CombinedFields>
+                <FormGroup>
                   <Label>Team Size *</Label>
                   <Field name="teamSize">
                     {({ form, field }) => {
                       const options = [
-                        { value: "Just me", label: "Just me" },
-                        { value: "2–5 members", label: "2–5 members" },
-                        { value: "6–10", label: "6–10" },
-                        { value: "10+", label: "10+" },
+                        { value: "just_me", label: "Just me" },
+                        { value: "2_5", label: "2–5 members" },
+                        { value: "6_10", label: "6–10" },
+                        { value: "10_plus", label: "10+" },
                       ];
                       return (
                         <Select
@@ -414,17 +451,6 @@ const SignupAgencyForm = () => {
                     }}
                   </Field>
                   <ErrorMessage name="teamSize" component={ErrorText} />
-                </FormGroup>
-              </CombinedFields>
-
-              <CombinedFields>
-                <FormGroup>
-                  <Label>Website / Social Profile</Label>
-                  <Field
-                    as={Input}
-                    name="website"
-                    placeholder="Link to your website or social page"
-                  />
                 </FormGroup>
 
                 <FormGroup>
@@ -466,26 +492,12 @@ const SignupAgencyForm = () => {
 
               <CombinedFields>
                 <FormGroup>
-                  <Label>Create a Password *</Label>
-                  <PasswordWrapper>
-                    <Field
-                      as={PasswordInput}
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
-                    />
-                    <EyeButton
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <AiOutlineEyeInvisible />
-                      ) : (
-                        <AiOutlineEye />
-                      )}
-                    </EyeButton>
-                  </PasswordWrapper>
-                  <ErrorMessage name="password" component={ErrorText} />
+                  <Label>Website / Social Profile</Label>
+                  <Field
+                    as={Input}
+                    name="website"
+                    placeholder="Link to your website or social page"
+                  />
                 </FormGroup>
 
                 <FormGroup>
@@ -493,7 +505,7 @@ const SignupAgencyForm = () => {
                   <Field
                     as={Input}
                     name="referralName"
-                    placeholder="Optional"
+                    placeholder="Enter referral name"
                   />
                 </FormGroup>
               </CombinedFields>
@@ -502,34 +514,28 @@ const SignupAgencyForm = () => {
                 <FormGroupMulti>
                   <Label>What do you need SellWithBot for? *</Label>
                   <CheckboxGroup>
-                    {[
-                      "Sell my digital products",
-                      "Automate DMs & lead gen",
-                      "Close deals on autopilot",
-                      "Run client campaigns",
-                      "Resell as white-label",
-                    ].map((item) => (
-                      <label key={item}>
+                    {useCaseOptions.map(({ value, label }) => (
+                      <label key={value}>
                         <input
                           type="checkbox"
-                          value={item}
-                          checked={values.purpose.includes(item)}
+                          value={value}
+                          checked={values.purpose.includes(value)}
                           onChange={(e) => {
-                            const isChecked = e.target.checked;
-                            if (isChecked) {
+                            const checked = e.target.checked;
+                            if (checked) {
                               setFieldValue("purpose", [
                                 ...values.purpose,
-                                item,
+                                value,
                               ]);
                             } else {
                               setFieldValue(
                                 "purpose",
-                                values.purpose.filter((v) => v !== item)
+                                values.purpose.filter((v) => v !== value)
                               );
                             }
                           }}
                         />{" "}
-                        {item}
+                        {label}
                       </label>
                     ))}
                   </CheckboxGroup>
@@ -539,36 +545,30 @@ const SignupAgencyForm = () => {
                 <FormGroupMulti>
                   <Label>Preferred Platform for Integration *</Label>
                   <CheckboxGroup>
-                    {[
-                      "Instagram",
-                      "WhatsApp",
-                      "Facebook",
-                      "Website",
-                      "Others",
-                    ].map((platform) => (
-                      <label key={platform}>
+                    {platformOptions.map(({ value, label }) => (
+                      <label key={value}>
                         <input
                           type="checkbox"
-                          value={platform}
-                          checked={values.preferredPlatform.includes(platform)}
+                          value={value}
+                          checked={values.preferredPlatform.includes(value)}
                           onChange={(e) => {
                             const checked = e.target.checked;
                             if (checked) {
                               setFieldValue("preferredPlatform", [
                                 ...values.preferredPlatform,
-                                platform,
+                                value,
                               ]);
                             } else {
                               setFieldValue(
                                 "preferredPlatform",
                                 values.preferredPlatform.filter(
-                                  (v) => v !== platform
+                                  (v) => v !== value
                                 )
                               );
                             }
                           }}
                         />{" "}
-                        {platform}
+                        {label}
                       </label>
                     ))}
                   </CheckboxGroup>
@@ -589,13 +589,9 @@ const SignupAgencyForm = () => {
                 <ErrorMessage name="termsAccepted" component={ErrorText} />
               </FormGroupDiff>
 
-              <Button>
-                Create My Agency Account
-              </Button>
-
-              {/* <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? <Loader /> : "Create My Agency Account"}
-              </Button> */}
+              </Button>
             </StyledForm>
           )}
         </Formik>

@@ -30,7 +30,7 @@ const OtpBox = styled.div`
 const Heading = styled.h1`
   font-size: 28px;
   font-weight: bold;
-  color: #3182CE;
+  color: #3182ce;
   margin-bottom: 20px;
 `;
 
@@ -55,10 +55,10 @@ const OtpInput = styled.input`
   text-align: center;
   border: 1px solid #ccc;
   border-radius: 8px;
-  color: #3182CE;
+  color: #3182ce;
 
   &:focus {
-    border-color: #3182CE;
+    border-color: #3182ce;
     outline: none;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
   }
@@ -110,99 +110,132 @@ const ErrorText = styled.div`
 
 // Validation Schema
 const validationSchema = Yup.object({
-    otp: Yup.array()
-        .of(Yup.string().matches(/^\d$/, "Must be a digit").required("Required"))
-        .length(6, "OTP must be 6 digits"),
+  otp: Yup.array()
+    .of(Yup.string().matches(/^\d$/, "Must be a digit").required("Required"))
+    .length(6, "OTP must be 6 digits"),
 });
 
-
 const VerifyOTP = () => {
-    const location = useLocation();
-    const email = location.state?.email;
+  const location = useLocation();
+  const email = location.state?.email;
 
-    const navigate = useNavigate();
-    const inputsRef = useRef([]);
+  const navigate = useNavigate();
+  const inputsRef = useRef([]);
 
-    const mutation = useMutation({
-        mutationFn: ({ email, otp }) => verifyOtpCode({ email, otp }),
-        onSuccess: () => {
-            toast.success("Your Account Registered Successfully!");
-            navigate("/");
-        },
-        onError: (error) => {
-            const message = error.message?.toLowerCase();
-            if (message === "invalid email or otp") {
-                toast.error("Invalid OTP");
-            } else {
-                toast.error(message || "Verification failed or Network Issue");
-            }
-        },
-    });
+  const mutation = useMutation({
+    mutationFn: ({ email, otp }) => verifyOtpCode({ email, otp }),
+    onSuccess: () => {
+      toast.success("Your Account Registered Successfully!");
+      navigate("/");
+    },
+    onError: (error) => {
+      const message = error.message?.toLowerCase();
+      if (message === "invalid email or otp") {
+        toast.error("Invalid OTP");
+      } else {
+        toast.error(message || "Verification failed or Network Issue");
+      }
+    },
+  });
 
-    return (
-        <Container>
-            <OtpBox>
-                <Heading>Verify OTP</Heading>
-                <Formik
-                    initialValues={{ otp: Array(6).fill("") }}
-                    validationSchema={validationSchema}
-                    onSubmit={(values) => {
-                        const joinedOtp = values.otp.join("");
-                        mutation.mutate({ email, otp: joinedOtp });
-                    }}
-                >
-                    {({ values, errors, touched, setFieldValue, handleBlur }) => (
-                        <StyledForm>
-                            <FieldArray name="otp">
-                                {() => (
-                                    <>
-                                        <OtpInputs>
-                                            {values.otp.map((_, index) => (
-                                                <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                                    <OtpInput
-                                                        type="text"
-                                                        maxLength={1}
-                                                        value={values.otp[index]}
-                                                        ref={(el) => (inputsRef.current[index] = el)}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            if (/^\d?$/.test(val)) {
-                                                                setFieldValue(`otp[${index}]`, val);
-                                                                if (val && index < 5) {
-                                                                    inputsRef.current[index + 1]?.focus();
-                                                                }
-                                                            }
-                                                        }}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === "Backspace" && !values.otp[index] && index > 0) {
-                                                                inputsRef.current[index - 1]?.focus();
-                                                            }
-                                                        }}
-                                                        onBlur={handleBlur}
-                                                    />
-                                                    {touched.otp?.[index] && errors.otp?.[index] && (
-                                                        <ErrorText>{errors.otp[index]}</ErrorText>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </OtpInputs>
-                                        {typeof errors.otp === "string" && (
-                                            <ErrorText style={{ textAlign: "center", marginTop: "-10px" }}>{errors.otp}</ErrorText>
-                                        )}
-                                    </>
-                                )}
-                            </FieldArray>
-
-                            <Button type="submit" disabled={mutation.isPending}>
-                                {mutation.isPending ? <Loader /> : "Verify"}
-                            </Button>
-                        </StyledForm>
+  return (
+    <Container>
+      <OtpBox>
+        <Heading>Verify OTP</Heading>
+        <Formik
+          initialValues={{ otp: Array(6).fill("") }}
+          validationSchema={validationSchema}
+          onSubmit={(values) => {
+            const joinedOtp = values.otp.join("");
+            mutation.mutate({ email, otp: joinedOtp });
+          }}
+        >
+          {({ values, errors, touched, setFieldValue, handleBlur }) => (
+            <StyledForm>
+              <FieldArray name="otp">
+                {() => (
+                  <>
+                    <OtpInputs>
+                      {values.otp.map((_, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                          }}
+                        >
+                          <OtpInput
+                            type="text"
+                            maxLength={1}
+                            value={values.otp[index]}
+                            ref={(el) => (inputsRef.current[index] = el)}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (/^\d?$/.test(val)) {
+                                setFieldValue(`otp[${index}]`, val);
+                                if (val && index < 5) {
+                                  inputsRef.current[index + 1]?.focus();
+                                }
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (
+                                e.key === "Backspace" &&
+                                !values.otp[index] &&
+                                index > 0
+                              ) {
+                                inputsRef.current[index - 1]?.focus();
+                              }
+                            }}
+                            onPaste={(e) => {
+                              e.preventDefault();
+                              const paste = e.clipboardData
+                                .getData("text")
+                                .replace(/\D/g, ""); // Only digits
+                              if (paste.length > 0) {
+                                const otpChars = paste.slice(0, 6).split("");
+                                otpChars.forEach((char, i) => {
+                                  setFieldValue(`otp[${i}]`, char);
+                                  if (inputsRef.current[i]) {
+                                    inputsRef.current[i].value = char;
+                                  }
+                                });
+                                // Move focus to the last filled input
+                                const lastIndex = otpChars.length - 1;
+                                if (inputsRef.current[lastIndex]) {
+                                  inputsRef.current[lastIndex].focus();
+                                }
+                              }
+                            }}
+                            onBlur={handleBlur}
+                          />
+                          {touched.otp?.[index] && errors.otp?.[index] && (
+                            <ErrorText>{errors.otp[index]}</ErrorText>
+                          )}
+                        </div>
+                      ))}
+                    </OtpInputs>
+                    {typeof errors.otp === "string" && (
+                      <ErrorText
+                        style={{ textAlign: "center", marginTop: "-10px" }}
+                      >
+                        {errors.otp}
+                      </ErrorText>
                     )}
-                </Formik>
+                  </>
+                )}
+              </FieldArray>
 
-            </OtpBox>
-        </Container>
-    );
+              <Button type="submit" disabled={mutation.isPending}>
+                {mutation.isPending ? <Loader /> : "Verify"}
+              </Button>
+            </StyledForm>
+          )}
+        </Formik>
+      </OtpBox>
+    </Container>
+  );
 };
 
 export default VerifyOTP;

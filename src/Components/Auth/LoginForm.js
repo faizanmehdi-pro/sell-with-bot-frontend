@@ -10,8 +10,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { useQueryClient } from '@tanstack/react-query';
-import logo from '../../assets/images/Logo.png'
+import { useQueryClient } from "@tanstack/react-query";
+import logo from "../../assets/images/Logo.png";
 
 const Container = styled.div`
   display: flex;
@@ -31,20 +31,10 @@ const LoginBox = styled.div`
   max-width: 400px;
   width: 100%;
 
-  img{
+  img {
     margin-bottom: 10px;
   }
 `;
-
-// const Heading = styled.h1`
-//   font-size: 32px;
-//   font-weight: bold;
-//   color: #3182CE;
-//   text-transform: uppercase;
-//   letter-spacing: 2px;
-//   text-shadow: 2px 2px 10px rgba(0, 123, 255, 0.5);
-//   margin-bottom: 20px;
-// `;
 
 const StyledForm = styled(Form)`
   display: flex;
@@ -81,7 +71,9 @@ const Input = styled.input`
     border-color: ${(props) => (props.error ? "#ff4d4f" : "#3182CE")};
     outline: none;
     box-shadow: ${(props) =>
-    props.error ? "0 0 5px rgba(255, 77, 79, 0.5)" : "0 0 5px rgba(0, 123, 255, 0.5)"};
+      props.error
+        ? "0 0 5px rgba(255, 77, 79, 0.5)"
+        : "0 0 5px rgba(0, 123, 255, 0.5)"};
   }
 `;
 
@@ -112,7 +104,7 @@ const EyeButton = styled.button`
   color: #777;
 
   &:hover {
-    color: #3182CE;
+    color: #3182ce;
   }
 `;
 
@@ -122,7 +114,7 @@ const LinkText = styled.p`
   margin-top: 10px;
 
   a {
-    color: #3182CE;
+    color: #3182ce;
     text-decoration: none;
     font-weight: bold;
 
@@ -159,8 +151,12 @@ export const Loader = styled.div`
   display: inline-block;
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -173,7 +169,9 @@ const GoogleLoginWrapper = styled.div`
 
 // Yup validation schema
 const validationSchema = Yup.object({
-  email: Yup.string().email("Invalid email format").required("Email is required"),
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
   password: Yup.string().required("Password is required"),
 });
 
@@ -183,35 +181,37 @@ const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-    const handleSuccess = async (credentialResponse) => {
-      const idToken = credentialResponse.credential;
-  
-      try {
-        const response = await axios.post("http://54.197.41.35/api/auth/google-login/", {
+  const handleSuccess = async (credentialResponse) => {
+    const idToken = credentialResponse.credential;
+
+    try {
+      const response = await axios.post(
+        "http://54.197.41.35/api/auth/google-login/",
+        {
           id_token: idToken,
-        });
-        
-  
-        toast.success("Google login successfully!");
-        navigate("/dashboard");
-        
-        login(response?.data?.token);
-        sessionStorage.setItem("user-ID", response?.data?.user_id);
-        sessionStorage.setItem("userName", response?.data?.full_name);
-        sessionStorage.setItem("firstName", response?.data?.first_name);
-        sessionStorage.setItem("lastName", response?.data?.last_name);
-        sessionStorage.setItem("online", response?.data?.online);
-        sessionStorage.setItem("botNumber", response?.data?.bot_number);
-        queryClient.removeQueries({ queryKey: ["botDetails"] });
-      } catch (error) {
-        console.error("Login failed", error);
-        toast.error("Google login failed");
-      }
-    };
-  
-    const handleError = () => {
-      toast.error("Google login was unsuccessful. Try again.");
-    };
+        }
+      );
+
+      toast.success("Google login successfully!");
+      navigate("/dashboard");
+
+      login(response?.data?.token);
+      sessionStorage.setItem("user-ID", response?.data?.user_id);
+      sessionStorage.setItem("userName", response?.data?.full_name);
+      sessionStorage.setItem("firstName", response?.data?.first_name);
+      sessionStorage.setItem("lastName", response?.data?.last_name);
+      sessionStorage.setItem("online", response?.data?.online);
+      sessionStorage.setItem("botNumber", response?.data?.bot_number);
+      queryClient.removeQueries({ queryKey: ["botDetails"] });
+    } catch (error) {
+      console.error("Login failed", error);
+      toast.error("Google login failed");
+    }
+  };
+
+  const handleError = () => {
+    toast.error("Google login was unsuccessful. Try again.");
+  };
 
   const mutation = useMutation({
     mutationFn: loginUser,
@@ -235,8 +235,7 @@ const Login = () => {
   return (
     <Container>
       <LoginBox>
-        <img src={logo} alt="logo" /> 
-        {/* <Heading>Sell with Bot</Heading> */}
+        <img src={logo} alt="logo" />
         <Formik
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchema}
@@ -246,7 +245,12 @@ const Login = () => {
             <StyledForm>
               <FormGroup>
                 <Label htmlFor="email">Email Address</Label>
-                <Input as={Field} type="email" name="email" placeholder="Enter your email" />
+                <Input
+                  as={Field}
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email"
+                />
                 <ErrorMessage name="email" component={ErrorText} />
               </FormGroup>
 
@@ -259,8 +263,15 @@ const Login = () => {
                     name="password"
                     placeholder="Enter your password"
                   />
-                  <EyeButton type="button" onClick={() => setShowPassword((prev) => !prev)}>
-                    {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                  <EyeButton
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? (
+                      <AiOutlineEyeInvisible />
+                    ) : (
+                      <AiOutlineEye />
+                    )}
                   </EyeButton>
                 </PasswordWrapper>
                 <ErrorMessage name="password" component={ErrorText} />
@@ -276,12 +287,10 @@ const Login = () => {
         <LinkText>
           Don't have an account? <Link to="/sign-up">Sign up</Link>
         </LinkText>
-                <LinkText>
-                  OR
-                </LinkText>
-                <GoogleLoginWrapper>
-                <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
-                </GoogleLoginWrapper>
+        <LinkText>OR</LinkText>
+        <GoogleLoginWrapper>
+          <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+        </GoogleLoginWrapper>
       </LoginBox>
     </Container>
   );

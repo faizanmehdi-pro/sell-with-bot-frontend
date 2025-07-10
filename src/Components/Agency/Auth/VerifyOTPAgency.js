@@ -149,12 +149,12 @@ const VerifyOTPAgency = () => {
         <Heading>Verify OTP</Heading>
 
         <Formik
-          initialValues={{ otp: Array(6).fill("") }}
-        //   initialValues={{
-        //       otp: location.state?.otp
-        //         ? location.state.otp.split("").slice(0, 6)
-        //         : Array(6).fill(""),
-        //     }}
+          // initialValues={{ otp: Array(6).fill("") }}
+          initialValues={{
+              otp: location.state?.otp
+                ? location.state.otp.split("").slice(0, 6)
+                : Array(6).fill(""),
+            }}
           validationSchema={validationSchema}
           onSubmit={(values) => {
             const joinedOtp = values.otp.join("");

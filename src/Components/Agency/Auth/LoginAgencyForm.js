@@ -151,7 +151,7 @@ const LinkText = styled.p`
   margin-top: 10px;
 
   a {
-    color: #3182CE;
+    color: #3182ce;
     text-decoration: none;
     font-weight: bold;
 
@@ -194,7 +194,6 @@ const LoginAgencyForm = () => {
     <Container>
       <LoginBox>
         <img src={logo} alt="logo" />
-
         <Formik
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchema}
@@ -242,9 +241,9 @@ const LoginAgencyForm = () => {
             </StyledForm>
           )}
         </Formik>
-                <LinkText>
-                  Don't have an account? <Link to="/agency-sign-up">Sign up</Link>
-                </LinkText>
+        <LinkText>
+          Don't have an account? <Link to="/agency-sign-up">Sign up</Link>
+        </LinkText>
       </LoginBox>
     </Container>
   );

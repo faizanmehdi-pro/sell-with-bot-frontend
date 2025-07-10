@@ -17,9 +17,12 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #fff;
   padding: 20px;
   min-height: 100vh;
+  
+  @media (max-width: 768px) {
+    padding: 20px 10px;
+  }
 `;
 
 const LogoContainer = styled.div`
@@ -41,8 +44,21 @@ const LogoContainer = styled.div`
 
 const SignupBox = styled.div`
   text-align: center;
-  max-width: 700px;
+  max-width: 800px;
   width: 100%;
+  background: #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 20px 30px;
+  
+  @media (max-width: 990px) {
+    max-width: 90%;
+  }
+  
+  @media (max-width: 768px) {
+    max-width: 100%;
+    padding: 20px 18px;
+  }
 `;
 
 const StyledForm = styled(Form)`
@@ -203,7 +219,8 @@ const CheckboxGroup = styled.div`
 `;
 
 const validationSchema = Yup.object().shape({
-  fullName: Yup.string().required("Full name is required"),
+  firstName: Yup.string().required("First name is required"),
+  lastName: Yup.string().required("Last name is required"),
   agencyName: Yup.string().required("Agency name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string().min(6).required("Password is required"),
@@ -238,7 +255,8 @@ const SignupAgencyForm = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     const payload = {
-      full_name: values.fullName,
+      first_name: values.firstName,
+      last_name: values.lastName,
       agency_name: values.agencyName,
       email: values.email,
       password: values.password,
@@ -255,7 +273,7 @@ const SignupAgencyForm = () => {
 
     try {
       const res = await SignUpAgencyUser(payload);
-      toast.success(res.message || "Signup successful!");
+      toast.success(res.message || "Please verify your email with the OTP sent.!");
       navigate("/verify-otp-agency", {
         state: { email: values.email, otp: res?.OTP },
       });
@@ -275,7 +293,8 @@ const SignupAgencyForm = () => {
 
         <Formik
           initialValues={{
-            fullName: "",
+            firstName: "",
+            lastName: "",
             agencyName: "",
             email: "",
             password: "",
@@ -296,15 +315,25 @@ const SignupAgencyForm = () => {
             <StyledForm>
               <CombinedFields>
                 <FormGroup>
-                  <Label>Full Name *</Label>
+                  <Label>First Name *</Label>
                   <Field
                     as={Input}
-                    name="fullName"
-                    placeholder="Enter your full name"
+                    name="firstName"
+                    placeholder="Enter your first name"
                   />
-                  <ErrorMessage name="fullName" component={ErrorText} />
+                  <ErrorMessage name="firstName" component={ErrorText} />
                 </FormGroup>
-
+                <FormGroup>
+                  <Label>Last Name *</Label>
+                  <Field
+                    as={Input}
+                    name="lastName"
+                    placeholder="Enter your last name"
+                  />
+                  <ErrorMessage name="lastName" component={ErrorText} />
+                </FormGroup>
+              </CombinedFields>
+              <CombinedFields>
                 <FormGroup>
                   <Label>Agency Name *</Label>
                   <Field
@@ -313,6 +342,14 @@ const SignupAgencyForm = () => {
                     placeholder="Your business/agency name"
                   />
                   <ErrorMessage name="agencyName" component={ErrorText} />
+                </FormGroup>
+                <FormGroup>
+                  <Label>Referral Name</Label>
+                  <Field
+                    as={Input}
+                    name="referralName"
+                    placeholder="Enter referral name"
+                  />
                 </FormGroup>
               </CombinedFields>
 
@@ -497,15 +534,6 @@ const SignupAgencyForm = () => {
                     as={Input}
                     name="website"
                     placeholder="Link to your website or social page"
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label>Referral Name</Label>
-                  <Field
-                    as={Input}
-                    name="referralName"
-                    placeholder="Enter referral name"
                   />
                 </FormGroup>
               </CombinedFields>

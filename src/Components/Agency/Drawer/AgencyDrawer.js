@@ -270,8 +270,9 @@ function AgencyDrawer() {
                     <AvatarCircle>{initials.toUpperCase() || "U"}</AvatarCircle>
                     <div>
                       <NameText>
-                        {sessionStorage.getItem("firstNameAgency") +
-                          sessionStorage.getItem("lastNameAgency") ||
+                        {`${sessionStorage.getItem("firstNameAgency") || ""} ${
+                          sessionStorage.getItem("lastNameAgency") || ""
+                        }`.trim() ||
                           sessionStorage.getItem("userNameAgency") ||
                           "User"}
                       </NameText>

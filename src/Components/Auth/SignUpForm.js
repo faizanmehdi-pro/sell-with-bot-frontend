@@ -19,9 +19,12 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #fff;
   padding: 20px;
   min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 20px 10px;
+  }
 `;
 
 const LogoContainer = styled.div`
@@ -43,8 +46,21 @@ const LogoContainer = styled.div`
 
 const SignupBox = styled.div`
   text-align: center;
-  max-width: 700px;
+  max-width: 800px;
   width: 100%;
+  background: #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 20px 30px;
+
+  @media (max-width: 990px) {
+    max-width: 90%;
+  }
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    padding: 20px 18px;
+  }
 `;
 
 const SubText = styled.p`

@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from "styled-components";
 import DashboardStats from './DashboardStats';
-import Customers from './Customers';
+import AgencyCustomers from './Customers';
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -18,7 +18,7 @@ const AgencyDashboardComponents = () => {
   return (
     <DashboardContainer>
       <DashboardStats />
-      <Customers />
+      <AgencyCustomers />
     </DashboardContainer>
   )
 }

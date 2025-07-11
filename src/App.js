@@ -16,7 +16,6 @@ import Dashboard from "./Pages/Dashboard/Dashboard";
 import Integrate from "./Pages/ModifyBot/Integrate";
 import Main from "./Pages/ModifyBot/Main";
 import VerifyOTP from "./Components/Auth/VerifyOTP";
-import MessageTable from "./Components/Dashboard/MessageTable";
 import TestBot from "./Pages/ModifyBot/TestBot";
 import GlobalStyles from "./styles/GlobalStyles";
 import LoginAdmin from "./Pages/SuperAdmin/Login/LoginAdmin";

@@ -6,15 +6,33 @@ const api = axios.create({
   baseURL: baseURL,
 });
 
-export const getAgencySubAccountsList = async () => {
+export const getAgencySubAccountsList = async (page) => {
   const userToken = sessionStorage.getItem("agencyAuthToken");
   const API_KEY = `token ${userToken}`;
-
-  const response = await api.get(`/api/sub-account-list/`, {
+  try {
+  const response = await api.get(`/api/sub-account-list/?page=${page}`, {
     headers: {
       "Content-Type": "application/json",
       authorization: API_KEY,
     },
   });
   return response.data;
+} catch (error) {
+  const errorData = error.response?.data;
+
+  let message = "Something went wrong while fetching Agency Sub Accounts.";
+
+  if (typeof errorData === "object" && errorData !== null) {
+    message = Object.entries(errorData)
+      .map(
+        ([field, errors]) =>
+          `${field}: ${Array.isArray(errors) ? errors.join(", ") : errors}`
+      )
+      .join("\n");
+  } else if (typeof errorData === "string") {
+    message = errorData;
+  }
+
+  throw new Error(message);
+}
 };

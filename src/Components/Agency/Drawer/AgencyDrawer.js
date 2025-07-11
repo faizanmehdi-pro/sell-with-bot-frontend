@@ -25,9 +25,9 @@ import BillingIconA from "../../../assets/SuperAdmin/sidebarIcons/billingA.png";
 import UsersIconA from "../../../assets/SuperAdmin/sidebarIcons/usersA.png";
 import IntegrateIcon from "../../../assets/SuperAdmin/integrate/integrate.png";
 import IntegrateIconA from "../../../assets/SuperAdmin/integrate/integrateA.png";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { FiChevronDown, FiChevronUp, FiLogOut } from "react-icons/fi";
-import { logoutAgencyUser } from "../../../apis/Agency/Auth/logoutAgencyUser";
+// import { logoutAgencyUser } from "../../../apis/Agency/Auth/logoutAgencyUser";
 
 const drawerWidth = 265;
 
@@ -109,7 +109,7 @@ function AgencyDrawer() {
       </LogoContainer>
       <LogoDivider />
       <List>
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/agency-dashboard" ? (
             <ActiveItem component={Link} to="/agency-dashboard">
               <ActiveItemIcon>
@@ -127,7 +127,7 @@ function AgencyDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/agency-sub-accounts" ? (
             <ActiveItem component={Link} to="/agency-sub-accounts">
               <ActiveItemIcon>
@@ -145,7 +145,7 @@ function AgencyDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/agency-billing" ? (
             <ActiveItem component={Link} to="/agency-billing">
               <ActiveItemIcon>
@@ -163,7 +163,7 @@ function AgencyDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/agency-users" ? (
             <ActiveItem component={Link} to="/agency-users">
               <ActiveItemIcon>
@@ -181,7 +181,7 @@ function AgencyDrawer() {
           )}
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => setMobileOpen(false)}>
           {currentPath === "/agency-integrate" ? (
             <ActiveItem component={Link} to="/agency-integrate">
               <ActiveItemIcon>

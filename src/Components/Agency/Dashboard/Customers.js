@@ -5,6 +5,8 @@ import { BsChevronCompactDown } from "react-icons/bs";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { Table, Thead, Tbody, Tr, Th, Td } from "react-super-responsive-table";
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css";
+import { useQuery } from "@tanstack/react-query";
+import { getAgencyCustomersList } from "../../../apis/Agency/Dashboard/getAgencyCustomersList";
 
 // Reuse your styled components for container, card, header, etc.
 
@@ -17,7 +19,7 @@ const Card = styled.div`
   border-radius: 30px;
   padding: 2rem;
   box-shadow: 0px 10px 60px 0px #e2ecf980;
-  
+
   @media (max-width: 768px) {
     padding: 20px;
   }
@@ -64,7 +66,7 @@ const SearchSort = styled.div`
     justify-content: flex-end;
     align-items: flex-end;
   }
-  
+
   @media (max-width: 500px) {
     justify-content: flex-end;
     align-items: flex-end;
@@ -132,7 +134,7 @@ const PageNumbers = styled.div`
       color: #ffffff;
     }
   }
-  
+
   @media (max-width: 500px) {
     gap: 10px;
   }
@@ -150,7 +152,7 @@ const SearchWrapper = styled.div`
   border-radius: 10px;
   padding: 0 20px;
   gap: 8px;
-  
+
   @media (max-width: 500px) {
     width: 100%;
   }
@@ -172,7 +174,7 @@ const StyledSearchInput = styled.input`
     font-size: 12px;
     color: #b5b7c0;
   }
-  
+
   @media (max-width: 500px) {
     width: 90%;
   }
@@ -180,7 +182,7 @@ const StyledSearchInput = styled.input`
 
 const DropDownContainer = styled.div`
   position: relative;
-  
+
   @media (max-width: 500px) {
     width: 100%;
   }
@@ -200,7 +202,7 @@ const DropdownButton = styled.button`
   cursor: pointer;
   width: 240px;
   height: 40px;
-  
+
   @media (max-width: 500px) {
     width: 100%;
   }
@@ -218,7 +220,7 @@ const SelectField = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 125px;
-  
+
   @media (max-width: 500px) {
     width: 70%;
   }
@@ -290,6 +292,13 @@ const StyledTable = styled(Table)`
     text-align: center;
   }
 
+  @media (max-width: 1440px) {
+    th,
+    td {
+      font-size: 12px;
+      padding: 12px 8px;
+    }
+  }
   /* For screen widths <= 1300px show stacked cards */
   @media (max-width: 1300px) {
     thead {
@@ -301,7 +310,7 @@ const StyledTable = styled(Table)`
       margin-bottom: 1.5rem;
       border-radius: 10px;
       padding: 1rem;
-      border: 1px solid #E6E7E9;
+      border: 1px solid #e6e7e9;
     }
     td {
       display: flex;
@@ -323,18 +332,18 @@ const StyledTable = styled(Table)`
   }
 
   @media (max-width: 640px) {
-    tbody tr{
-      border: 1px solid #E6E7E9;
+    tbody tr {
+      border: 1px solid #e6e7e9;
     }
 
     .tdBefore {
-    color: #b5b7c0;
-    font-family: "Poppins", sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-  }
+      color: #b5b7c0;
+      font-family: "Poppins", sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+    }
 
-    td.pivoted{
+    td.pivoted {
       padding-left: 0 !important;
       justify-content: flex-end;
     }
@@ -345,93 +354,59 @@ const StyledTable = styled(Table)`
     }
   }
 
-  
-  @media (max-width: 370px) {
-    
+  @media (max-width: 500px) {
     .tdBefore {
-    font-size: 10px;
+      font-size: 11px;
+    }
+
+    td {
+      font-size: 11px;
+      text-align: right;
+    }
   }
 
+  @media (max-width: 370px) {
+    .tdBefore {
+      font-size: 10px;
+    }
 
-  td {
-    font-size: 10px;
-    text-align: right;
+    td {
+      font-size: 10px;
+    }
   }
+`;
+
+const ListLoader = styled.div`
+  border: 4px solid #3182ce;
+  border-radius: 50%;
+  border-top: 4px solid #fff;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;
 
 const options = ["Newest", "Oldest", "A-Z", "Z-A"];
 
-const customers = [
-  {
-    name: "Jane Cooper",
-    botId: "abc1234",
-    phone: "(225) 555-0118",
-    email: "jane@microsoft.com",
-    country: "United States",
-    status: "Active",
-  },
-  {
-    name: "Floyd Miles",
-    botId: "abc12345",
-    phone: "(205) 555-0100",
-    email: "floyd@yahoo.com",
-    country: "Kiribati",
-    status: "Inactive",
-  },
-  {
-    name: "Ronald Richards",
-    botId: "ab123",
-    phone: "(302) 555-0107",
-    email: "ronald@adobe.com",
-    country: "Israel",
-    status: "Inactive",
-  },
-  {
-    name: "Marvin McKinney",
-    botId: "abc1232",
-    phone: "(252) 555-0126",
-    email: "marvin@tesla.com",
-    country: "Iran",
-    status: "Active",
-  },
-  {
-    name: "Jerome Bell",
-    botId: "asd1233",
-    phone: "(629) 555-0129",
-    email: "jerome@google.com",
-    country: "Réunion",
-    status: "Active",
-  },
-  {
-    name: "Kathryn Murphy",
-    botId: "asd445657",
-    phone: "(405) 555-0120",
-    email: "kathryn@microsoft.com",
-    country: "Curaçao",
-    status: "Active",
-  },
-  {
-    name: "Jacob Jones",
-    botId: "zc5857",
-    phone: "(208) 555-0112",
-    email: "jacob@yahoo.com",
-    country: "Brazil",
-    status: "Active",
-  },
-  {
-    name: "Kristin Watson",
-    botId: "123zww",
-    phone: "(704) 555-0127",
-    email: "kristin@facebook.com",
-    country: "Åland Islands",
-    status: "Inactive",
-  },
-];
-
-const Customers = () => {
+const AgencyCustomers = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Newest");
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["agency-customers", page],
+    queryFn: () => getAgencyCustomersList(page),
+    keepPreviousData: true,
+  });
 
   const handleSelect = (option) => {
     setSelected(option);
@@ -444,7 +419,7 @@ const Customers = () => {
         <Header>
           <TitleGroup>
             <MainTitle>All Customers</MainTitle>
-            {/* <SubLink>Active Members</SubLink> */}
+            <SubLink>Active Members</SubLink>
           </TitleGroup>
           <SearchSort>
             <SearchWrapper>
@@ -485,45 +460,85 @@ const Customers = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {customers.map((cust, index) => (
-              <Tr key={index}>
-                <Td data-label="Customer Name">{cust.name}</Td>
-                <Td data-label="Bot ID (abc123)">{cust.botId}</Td>
-                <Td data-label="Phone Number">{cust.phone}</Td>
-                <Td data-label="Email">{cust.email}</Td>
-                <Td data-label="Country">{cust.country}</Td>
-                <Td data-label="Status" className="status-cell">
-                  <StatusButton status={cust.status}>
-                    {cust.status}
-                  </StatusButton>
+            {isLoading ? (
+              <Tr>
+                <Td colSpan="5">
+                  <ListLoader />
                 </Td>
               </Tr>
-            ))}
+            ) : isError ? (
+              <Tr>
+                <Td colSpan="5">
+                  {error?.message || "Error fetching Agency Customers"}
+                </Td>
+              </Tr>
+            ) : data?.results?.length === 0 ? (
+              <Tr>
+                <Td colSpan="5" style={{ textAlign: "laft", padding: "1rem" }}>
+                  No Agency Customer Found.
+                </Td>
+              </Tr>
+            ) : (
+              data?.results?.map((cust, index) => (
+                <Tr key={index}>
+                  <Td data-label="Customer Name">
+                    {cust.customer_name || "N/A"}
+                  </Td>
+                  <Td data-label="Bot ID (abc123)">
+                    {cust.unique_number || "N/A"}
+                  </Td>
+                  <Td data-label="Phone Number">
+                    {cust.phone_number || "N/A"}
+                  </Td>
+                  <Td data-label="Email">{cust.email || "N/A"}</Td>
+                  <Td data-label="Country">{cust.country || "N/A"}</Td>
+                  <Td data-label="Status" className="status-cell">
+                    <StatusButton status={cust.status}>
+                      {cust.status}
+                    </StatusButton>
+                  </Td>
+                </Tr>
+              ))
+            )}
           </Tbody>
         </StyledTable>
-
-        <Pagination>
-          <PaginationHeading>
-            Showing data 1 to 8 of 80K entries
-          </PaginationHeading>
-          <PageNumbers>
-            <button>
-              <FaAngleLeft />
-            </button>
-            <button className="active">1</button>
-            <button>2</button>
-            <button>3</button> 
-            <button>4</button>
-            <button>...</button>
-            <button>10</button>
-            <button>
-              <FaAngleRight />
-            </button>
-          </PageNumbers>
-        </Pagination>
+        {!isLoading && !isError && data?.results?.length > 0 && (
+          <Pagination>
+            <PaginationHeading>
+              Showing data {(page - 1) * 10 + 1} to{" "}
+              {Math.min(page * 10, data?.count || 0)} of {data?.count || 0}{" "}
+              entries
+            </PaginationHeading>
+            <PageNumbers>
+              <button
+                onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                disabled={page === 1}
+              >
+                <FaAngleLeft />
+              </button>
+              {[...Array(Math.ceil((data?.count || 1) / 10)).keys()]
+                .slice(0, 5)
+                .map((p) => (
+                  <button
+                    key={p + 1}
+                    onClick={() => setPage(p + 1)}
+                    className={page === p + 1 ? "active" : ""}
+                  >
+                    {p + 1}
+                  </button>
+                ))}
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page >= Math.ceil((data?.count || 1) / 10)}
+              >
+                <FaAngleRight />
+              </button>
+            </PageNumbers>
+          </Pagination>
+        )}
       </Card>
     </Container>
   );
 };
 
-export default Customers;
+export default AgencyCustomers;

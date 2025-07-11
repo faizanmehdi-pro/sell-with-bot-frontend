@@ -21,6 +21,7 @@ import { getAgencySubAccountsList } from "../../../apis/Agency/Accounts/getAgenc
 import { toast } from "react-toastify";
 import { switchToAgencyAccount } from "../../../apis/Agency/Accounts/switchToAgencyAccount";
 import { useAuth } from "../../Auth/AuthContext";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 
 const Container = styled.div`
   display: flex;
@@ -413,6 +414,58 @@ const ListLoader = styled.div`
     }
   }
 `;
+// Pagination and other styled components reused from your original code...
+
+const Pagination = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  font-size: 14px;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+  }
+`;
+
+const PaginationHeading = styled.p`
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #b5b7c0;
+`;
+
+const PageNumbers = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+
+  button {
+    width: 26px;
+    height: 26px;
+    border: 1px solid #eeeeee;
+    border-radius: 4px;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    color: #404b52;
+
+    &.active {
+      background: #3182ce;
+      border: 1px solid #dadada;
+      color: #ffffff;
+    }
+  }
+
+  @media (max-width: 500px) {
+    gap: 10px;
+  }
+`;
 
 const SubAccountComponent = () => {
   const { login } = useAuth();
@@ -426,10 +479,11 @@ const SubAccountComponent = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [activeSwitchId, setActiveSwitchId] = useState(null);
+  const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["agency-sub-accounts"],
-    queryFn: () => getAgencySubAccountsList(),
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["agency-sub-accounts", page],
+    queryFn: () => getAgencySubAccountsList(page),
     keepPreviousData: true,
   });
 
@@ -542,82 +596,120 @@ const SubAccountComponent = () => {
           </TabButton>
         </Tabs>
         {tab === "list" ? (
-          <CardGrid>
-            {isLoading ? (
-              <ListLoader />
-            ) : isError ? (
-              <p>Error Fetching Sub Accounts</p>
-            ) : (
-              data?.results?.map((account, index) => (
-                <Card key={index}>
-                  <CardTop>
-                    <CardTopLeft>
-                      <Label>Client name : {account.full_name}</Label>
-                      <InfoLine>
-                        Bot ID : <span>{account.bot_number || "N/A"}</span>
-                      </InfoLine>
-                      <CardTopCenter>
-                        <CardTopCenterInfo>
-                          <CardTopCenterInfoHeading>
-                            Number of chats
-                          </CardTopCenterInfoHeading>
-                          <CardTopCenterInfoLeftContainer>
-                            <CardTopCenterInfoLeft>
-                              <MdOutlineMarkChatUnread />
-                              {account.chat_count}
-                            </CardTopCenterInfoLeft>
-                            <CardTopCenterInfoRight>
-                              <FaArrowDown />
-                              {account.monthly_chat_percentage}
-                            </CardTopCenterInfoRight>
-                          </CardTopCenterInfoLeftContainer>
-                        </CardTopCenterInfo>
-                        <CardTopCenterInfo>
-                          <CardTopCenterInfoHeading>
-                            Usage of token
-                          </CardTopCenterInfoHeading>
-                          <CardTopCenterInfoLeftContainer>
-                            <CardTopCenterInfoLeft>
-                              <img src={bar} alt="icon" />
-                              {account.token_used}
-                            </CardTopCenterInfoLeft>
-                            <CardTopCenterInfoRight>
-                              <FaArrowDown />
-                              {account.monthly_token_percentage}
-                            </CardTopCenterInfoRight>
-                          </CardTopCenterInfoLeftContainer>
-                        </CardTopCenterInfo>
-                      </CardTopCenter>
-                    </CardTopLeft>
-                    <IconGroup onClick={() => handleDelete(account)}>
-                      <FaRegTrashAlt fontSize={19} />
-                    </IconGroup>
-                  </CardTop>
-                  <CardBottom>
-                    <SwitchButton
-                      onClick={() => switchMutation.mutate(account.id)}
-                      disabled={activeSwitchId === account.id}
-                    >
-                      {activeSwitchId === account.id ? (
-                        <ListLoader
-                          style={{
-                            width: "20px",
-                            height: "20px",
-                            borderWidth: "2px",
-                          }}
-                        />
-                      ) : (
-                        <>
-                          <TbArrowsRightLeft fontSize={20} /> Switch to
-                          Sub-Account
-                        </>
-                      )}
-                    </SwitchButton>
-                  </CardBottom>
-                </Card>
-              ))
+          <>
+            <CardGrid>
+              {isLoading ? (
+                <ListLoader />
+              ) : isError ? (
+                <p>{error?.message || "Error Fetching Sub Accounts"}</p>
+              ) : data?.results?.length === 0 ? (
+                <p>No Sub-Account Found</p>
+              ) : (
+                data?.results?.map((account, index) => (
+                  <Card key={index}>
+                    <CardTop>
+                      <CardTopLeft>
+                        <Label>Client name : {account.full_name}</Label>
+                        <InfoLine>
+                          Bot ID : <span>{account.bot_number || "N/A"}</span>
+                        </InfoLine>
+                        <CardTopCenter>
+                          <CardTopCenterInfo>
+                            <CardTopCenterInfoHeading>
+                              Number of chats
+                            </CardTopCenterInfoHeading>
+                            <CardTopCenterInfoLeftContainer>
+                              <CardTopCenterInfoLeft>
+                                <MdOutlineMarkChatUnread />
+                                {account.chat_count}
+                              </CardTopCenterInfoLeft>
+                              <CardTopCenterInfoRight>
+                                <FaArrowDown />
+                                {account.monthly_chat_percentage}
+                              </CardTopCenterInfoRight>
+                            </CardTopCenterInfoLeftContainer>
+                          </CardTopCenterInfo>
+                          <CardTopCenterInfo>
+                            <CardTopCenterInfoHeading>
+                              Usage of token
+                            </CardTopCenterInfoHeading>
+                            <CardTopCenterInfoLeftContainer>
+                              <CardTopCenterInfoLeft>
+                                <img src={bar} alt="icon" />
+                                {account.token_used}
+                              </CardTopCenterInfoLeft>
+                              <CardTopCenterInfoRight>
+                                <FaArrowDown />
+                                {account.monthly_token_percentage}
+                              </CardTopCenterInfoRight>
+                            </CardTopCenterInfoLeftContainer>
+                          </CardTopCenterInfo>
+                        </CardTopCenter>
+                      </CardTopLeft>
+                      <IconGroup onClick={() => handleDelete(account)}>
+                        <FaRegTrashAlt fontSize={19} />
+                      </IconGroup>
+                    </CardTop>
+                    <CardBottom>
+                      <SwitchButton
+                        onClick={() => switchMutation.mutate(account.id)}
+                        disabled={activeSwitchId === account.id}
+                      >
+                        {activeSwitchId === account.id ? (
+                          <ListLoader
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              borderWidth: "2px",
+                            }}
+                          />
+                        ) : (
+                          <>
+                            <TbArrowsRightLeft fontSize={20} /> Switch to
+                            Sub-Account
+                          </>
+                        )}
+                      </SwitchButton>
+                    </CardBottom>
+                  </Card>
+                ))
+              )}
+            </CardGrid>
+            {!isLoading && !isError && data?.results?.length > 0 && (
+              <Pagination>
+                <PaginationHeading>
+                  Showing data {(page - 1) * 10 + 1} to{" "}
+                  {Math.min(page * 10, data?.count || 0)} of {data?.count || 0}{" "}
+                  entries
+                </PaginationHeading>
+                <PageNumbers>
+                  <button
+                    onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                    disabled={page === 1}
+                  >
+                    <FaAngleLeft />
+                  </button>
+                  {[...Array(Math.ceil((data?.count || 1) / 10)).keys()]
+                    .slice(0, 5)
+                    .map((p) => (
+                      <button
+                        key={p + 1}
+                        onClick={() => setPage(p + 1)}
+                        className={page === p + 1 ? "active" : ""}
+                      >
+                        {p + 1}
+                      </button>
+                    ))}
+                  <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page >= Math.ceil((data?.count || 1) / 10)}
+                  >
+                    <FaAngleRight />
+                  </button>
+                </PageNumbers>
+              </Pagination>
             )}
-          </CardGrid>
+          </>
         ) : (
           <CreateSubAccount setTab={setTab} />
         )}
